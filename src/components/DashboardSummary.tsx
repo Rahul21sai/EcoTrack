@@ -76,7 +76,7 @@ export default function DashboardSummary({ entries }: DashboardSummaryProps) {
       <div
         className="relative overflow-hidden p-8 rounded-xl border border-[rgba(255,255,255,0.08)] bg-[#131A16] transition-all duration-200"
         style={{
-          background: `radial-gradient(circle at top right, ${IMPACT_RADIAL_BG[impact]} 0%, #131A16 70%)`
+          background: `radial-gradient(circle at top right, ${IMPACT_RADIAL_BG[impact]} 0%, var(--color-surface-elevated) 70%)`
         }}
         aria-label={`Your daily impact level is ${impact}`}
       >
@@ -89,8 +89,8 @@ export default function DashboardSummary({ entries }: DashboardSummaryProps) {
         </div>
       </div>
 
-      {/* Stats grid (responsive under 640px, 640px-1024px, above 1024px) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Stats grid (responsive under 640px, and 3 columns on desktop) */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         {stats.map((stat) => (
           <div
             key={stat.label}

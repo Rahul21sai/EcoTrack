@@ -2,17 +2,17 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg-base: #0B0F0D;
-  --color-surface-elevated: #131A16;
-  --color-surface-elevated-hover: #1A2420;
-  --color-border-subtle: rgba(255, 255, 255, 0.08);
-  --color-border-emphasis: rgba(255, 255, 255, 0.14);
-  --color-primary-accent: #3DDC97;
-  --color-warning-accent: #E8B84B;
-  --color-danger-accent: #E8634B;
-  --color-text-primary: #F2F5F3;
-  --color-text-secondary: #8FA098;
-  --color-text-tertiary: #5C6962;
+  --color-bg-base: #090D16;
+  --color-surface-elevated: #111622;
+  --color-surface-elevated-hover: #181F30;
+  --color-border-subtle: rgba(226, 232, 240, 0.06);
+  --color-border-emphasis: rgba(226, 232, 240, 0.12);
+  --color-primary-accent: #10B981;
+  --color-warning-accent: #F59E0B;
+  --color-danger-accent: #EF4444;
+  --color-text-primary: #F8FAFC;
+  --color-text-secondary: #94A3B8;
+  --color-text-tertiary: #475569;
 
   --font-display: "Space Grotesk", sans-serif;
   --font-sans: "Inter", sans-serif;
@@ -33,8 +33,8 @@ html {
 }
 
 body {
-  background-color: #0B0F0D;
-  color: #F2F5F3;
+  background-color: var(--color-bg-base);
+  color: var(--color-text-primary);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -120,3 +120,90 @@ body {
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }
+
+:root {
+  --accent-primary: #10B981;
+}
+
+.btn-log-activity {
+  background-color: color-mix(in srgb, var(--accent-primary) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-primary) 30%, transparent);
+  color: var(--accent-primary);
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background-color 150ms ease-in-out, border-color 150ms ease-in-out;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-log-activity:hover {
+  background-color: color-mix(in srgb, var(--accent-primary) 20%, transparent);
+}
+
+/* RETHEME OVERRIDES FOR HARDCODED UTILITY VALUES */
+.bg-\[\#0B0F0D\] {
+  background-color: var(--color-bg-base) !important;
+}
+.bg-\[\#131A16\] {
+  background-color: var(--color-surface-elevated) !important;
+}
+.bg-\[\#131A16\/90\] {
+  background-color: color-mix(in srgb, var(--color-surface-elevated) 90%, transparent) !important;
+}
+.bg-\[\#1A2420\] {
+  background-color: var(--color-surface-elevated-hover) !important;
+}
+.hover\:bg-\[\#1A2420\]:hover {
+  background-color: var(--color-surface-elevated-hover) !important;
+}
+.hover\:bg-\[\#1A2420\/50\]:hover {
+  background-color: color-mix(in srgb, var(--color-surface-elevated-hover) 50%, transparent) !important;
+}
+.border-\[rgba\(255\,255\,255\,0\.08\)\] {
+  border-color: var(--color-border-subtle) !important;
+}
+.border-top-\[rgba\(255\,255\,255\,0\.06\)\] {
+  border-top-color: var(--color-border-subtle) !important;
+}
+.border-\[rgba\(255\,255\,255\,0\.06\)\] {
+  border-color: var(--color-border-subtle) !important;
+}
+.hover\:border-\[rgba\(255\,255\,255\,0\.14\)\]:hover {
+  border-color: var(--color-border-emphasis) !important;
+}
+.divide-\[rgba\(255\,255\,255\,0\.06\)\] > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--color-border-subtle) !important;
+}
+.text-\[\#F2F5F3\] {
+  color: var(--color-text-primary) !important;
+}
+.text-\[\#8FA098\] {
+  color: var(--color-text-secondary) !important;
+}
+.text-\[\#5C6962\] {
+  color: var(--color-text-tertiary) !important;
+}
+.text-\[\#3DDC97\] {
+  color: var(--color-primary-accent) !important;
+}
+.bg-\[\#3DDC97\] {
+  background-color: var(--color-primary-accent) !important;
+}
+.focus\:border-\[\#3DDC97\]:focus {
+  border-color: var(--color-primary-accent) !important;
+}
+.focus\:ring-\[\#3DDC97\]:focus {
+  --tw-ring-color: var(--color-primary-accent) !important;
+}
+.bg-\[\#3DDC97\/10\] {
+  background-color: color-mix(in srgb, var(--color-primary-accent) 10%, transparent) !important;
+}
+.border-\[\#3DDC97\/20\] {
+  border-color: color-mix(in srgb, var(--color-primary-accent) 20%, transparent) !important;
+}
+.text-center.py-10.text-gray-500 {
+  color: var(--color-text-secondary) !important;
+}
+

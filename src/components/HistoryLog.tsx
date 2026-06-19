@@ -20,13 +20,13 @@ export default function HistoryLog({ entries, onDelete }: HistoryLogProps) {
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case 'transport':
-        return <Car className="w-4 h-4 text-[#3B82F6]" />;
+        return <Car className="w-4 h-4 text-[#3D8BFF]" />;
       case 'energy':
-        return <Zap className="w-4 h-4 text-[#F59E0B]" />;
+        return <Zap className="w-4 h-4 text-[#E8B84B]" />;
       case 'food':
-        return <Utensils className="w-4 h-4 text-[#10B981]" />;
+        return <Utensils className="w-4 h-4 text-[#3DDC97]" />;
       case 'waste':
-        return <Trash2 className="w-4 h-4 text-[#EF4444]" />;
+        return <Trash2 className="w-4 h-4 text-[#8FA098]" />;
       default:
         return null;
     }

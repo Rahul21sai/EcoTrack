@@ -169,7 +169,7 @@ export const CATEGORIES: CategoryMeta[] = [
     description: 'Emissions from travel and commuting',
     unit: 'km',
     icon: '🚗',
-    color: '#3B82F6', // Blue
+    color: '#3D8BFF',
   },
   {
     id: 'energy',
@@ -177,7 +177,7 @@ export const CATEGORIES: CategoryMeta[] = [
     description: 'Emissions from home electricity and gas usage',
     unit: 'kWh',
     icon: '⚡',
-    color: '#F59E0B', // Amber
+    color: '#E8B84B',
   },
   {
     id: 'food',
@@ -185,7 +185,7 @@ export const CATEGORIES: CategoryMeta[] = [
     description: 'Emissions from food consumption',
     unit: 'meals',
     icon: '🍽️',
-    color: '#10B981', // Emerald
+    color: '#3DDC97',
   },
   {
     id: 'waste',
@@ -193,7 +193,7 @@ export const CATEGORIES: CategoryMeta[] = [
     description: 'Emissions from waste disposal',
     unit: 'kg',
     icon: '🗑️',
-    color: '#EF4444', // Red
+    color: '#8FA098',
   },
 ] as const;
 

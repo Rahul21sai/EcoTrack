@@ -37,9 +37,9 @@ export default function ComparisonCard({ comparison }: ComparisonCardProps) {
       className="bg-[#131A16] rounded-xl p-5 border border-[rgba(255,255,255,0.08)] border-top-[1px] border-top-[rgba(255,255,255,0.06)] hover:bg-[#1A2420] hover:border-[rgba(255,255,255,0.14)] transition-all duration-150 ease-in-out"
       aria-label={`Comparison to ${comparison.country} average: ${comparison.status}`}
     >
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between gap-2 flex-wrap mb-4">
         <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[#8FA098]">vs {comparison.country} Average</h3>
-        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border uppercase tracking-wider ${config.badgeClass}`}>
+        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border uppercase tracking-wider whitespace-nowrap ${config.badgeClass}`}>
           {config.message}
         </span>
       </div>

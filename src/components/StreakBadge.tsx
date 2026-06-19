@@ -60,7 +60,7 @@ export default function StreakBadge({ streak, onNavigateToLog }: StreakBadgeProp
       {onNavigateToLog && (
         <button
           onClick={onNavigateToLog}
-          className="px-3.5 py-2 text-xs font-semibold rounded-lg border border-[rgba(255,255,255,0.08)] hover:bg-[#1A2420] text-[#F2F5F3] transition-all whitespace-nowrap cursor-pointer"
+          className="btn-log-activity"
         >
           Log Activity
         </button>

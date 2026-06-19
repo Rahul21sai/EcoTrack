@@ -46,40 +46,99 @@ function CategoryBreakdownChartInner({ data, onNavigateToLog }: CategoryBreakdow
 
   return (
     <div
-      className="bg-[#131A16] rounded-xl p-5 border border-[rgba(255,255,255,0.08)] border-top-[1px] border-top-[rgba(255,255,255,0.06)] hover:bg-[#1A2420] hover:border-[rgba(255,255,255,0.14)] transition-all duration-150 ease-in-out"
+      className="bg-[#131A16] rounded-xl p-5 border border-[rgba(255,255,255,0.08)] border-top-[1px] border-top-[rgba(255,255,255,0.06)] hover:bg-[#1A2420] hover:border-[rgba(255,255,255,0.14)] transition-all duration-150 ease-in-out flex flex-col justify-between h-full"
       aria-label={`Pie chart showing carbon emissions by category: ${ariaDescription}`}
     >
       <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[#8FA098] mb-4">Emissions by Category</h3>
-      <ResponsiveContainer width="100%" height={280}>
-        <RechartsPieChart>
-          <Pie
-            data={chartData}
-            cx="50%"
-            cy="50%"
-            innerRadius={60}
-            outerRadius={100}
-            paddingAngle={3}
-            dataKey="value"
-            stroke="none"
-          >
-            {chartData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.color} />
-            ))}
-          </Pie>
-          <Tooltip
-            contentStyle={{
-              backgroundColor: '#131A16',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-              borderRadius: '8px',
-              color: '#F2F5F3',
-            }}
-            formatter={(val: unknown) => [formatCarbonValue(Number(val as number) || 0), 'Emissions']}
-          />
-          <Legend
-            formatter={(value: string) => <span style={{ color: '#8FA098', fontSize: '11px', fontWeight: 500, textTransform: 'uppercase' }}>{value}</span>}
-          />
-        </RechartsPieChart>
-      </ResponsiveContainer>
+      <div className="flex-1 min-h-[280px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <RechartsPieChart>
+            <Pie
+              data={chartData}
+              cx="50%"
+              cy="50%"
+              innerRadius={60}
+              outerRadius={100}
+              paddingAngle={chartData.length > 1 ? 3 : 0}
+              dataKey="value"
+              stroke="none"
+              label={({ cx, cy, midAngle, outerRadius, percent, name }) => {
+                const RADIAN = Math.PI / 180;
+                const radius = outerRadius + 14;
+                const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                const textAnchor = x > cx ? 'start' : 'end';
+                
+                if (percent < 0.01) return null;
+                
+                return (
+                  <text
+                    x={x}
+                    y={y}
+                    fill="#8FA098"
+                    textAnchor={textAnchor}
+                    dominantBaseline="central"
+                    style={{
+                      fontSize: '10px',
+                      fontWeight: 600,
+                      fontFamily: '"Space Grotesk", sans-serif'
+                    }}
+                  >
+                    {`${name} (${(percent * 100).toFixed(0)}%)`}
+                  </text>
+                );
+              }}
+              labelLine={{ stroke: 'rgba(255, 255, 255, 0.12)', strokeWidth: 1 }}
+            >
+              {chartData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
+              ))}
+            </Pie>
+            <text
+              x="50%"
+              y="46%"
+              textAnchor="middle"
+              dominantBaseline="middle"
+              fill="#F2F5F3"
+              style={{
+                fontSize: '20px',
+                fontWeight: 'bold',
+                fontFamily: '"Space Grotesk", sans-serif'
+              }}
+            >
+              {formatCarbonValue(total)}
+            </text>
+            <text
+              x="50%"
+              y="56%"
+              textAnchor="middle"
+              dominantBaseline="middle"
+              fill="#8FA098"
+              style={{
+                fontSize: '10px',
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                fontFamily: '"Inter", sans-serif'
+              }}
+            >
+              Total
+            </text>
+            <Tooltip
+              contentStyle={{
+                backgroundColor: 'var(--color-surface-elevated)',
+                border: '1px solid var(--color-border-subtle)',
+                borderRadius: '8px',
+                color: 'var(--color-text-primary)',
+              }}
+              formatter={(val: unknown) => [formatCarbonValue(Number(val as number) || 0), 'Emissions']}
+            />
+            <Legend
+              formatter={(value: string) => <span style={{ color: '#8FA098', fontSize: '11px', fontWeight: 500, textTransform: 'uppercase' }}>{value}</span>}
+            />
+          </RechartsPieChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 }

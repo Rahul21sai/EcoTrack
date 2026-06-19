@@ -116,7 +116,7 @@ function AppContent() {
 
       {/* Header */}
       <header className="bg-[#0B0F0D] border-b border-[rgba(255,255,255,0.08)] sticky top-0 z-40">
-        <div className="max-w-5xl mx-auto px-4 py-3.5 flex items-center justify-between">
+        <div className="w-full max-w-[1440px] mx-auto px-6 py-3.5 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Leaf className="w-5 h-5 text-[#3DDC97]" />
             <h1 className="text-lg font-bold font-display text-[#F2F5F3] tracking-tight">EcoTrack</h1>
@@ -145,7 +145,7 @@ function AppContent() {
         className="bg-[#0B0F0D] border-b border-[rgba(255,255,255,0.08)]"
         aria-label="Main navigation"
       >
-        <div className="max-w-5xl mx-auto px-4 flex gap-6 overflow-x-auto">
+        <div className="w-full max-w-[1440px] mx-auto px-6 flex gap-6 overflow-x-auto">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
             return (
@@ -169,14 +169,14 @@ function AppContent() {
       </nav>
 
       {/* Main content */}
-      <main id="main-content" className="max-w-5xl mx-auto px-4 py-8">
+      <main id="main-content" className="w-full max-w-[1440px] mx-auto px-6 py-8">
         {/* Dashboard tab */}
         {activeTab === 'dashboard' && (
           <div className="space-y-8">
             <DashboardSummary entries={entries} />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 min-[900px]:grid-cols-[2fr_3fr] gap-8">
               <CategoryBreakdownChart data={breakdown} onNavigateToLog={() => setActiveTab('log')} />
-              <div className="space-y-6">
+              <div className="flex flex-col justify-between gap-6 h-full">
                 <StreakBadge streak={streak} onNavigateToLog={() => setActiveTab('log')} />
                 <ComparisonCard comparison={comparison} />
               </div>
@@ -216,7 +216,7 @@ function AppContent() {
 
       {/* Footer */}
       <footer className="bg-[#131A16] border-t border-[rgba(255,255,255,0.08)] mt-16">
-        <div className="max-w-5xl mx-auto px-4 py-8 text-center text-[#5C6962] text-[11px] uppercase tracking-wider">
+        <div className="w-full max-w-[1440px] mx-auto px-6 py-8 text-center text-[#5C6962] text-[11px] uppercase tracking-wider">
           <p>
             EcoTrack — Track, understand, and reduce your carbon footprint.
           </p>
