@@ -39,8 +39,8 @@ const getLocalProfileKey = (uid: string) => `ecotrack_local_profile_${uid}`;
 // Simulated QueryDocumentSnapshot for local storage pagination compatibility
 class MockQueryDocumentSnapshot {
   id: string;
-  private _data: any;
-  constructor(id: string, data: any) {
+  private _data: LogEntry;
+  constructor(id: string, data: LogEntry) {
     this.id = id;
     this._data = data;
   }
@@ -144,11 +144,10 @@ export async function getEntries(
     });
 
     let paginated = existing;
-    let lastIndex = -1;
 
     if (lastDoc) {
       const lastId = lastDoc.id;
-      lastIndex = existing.findIndex((e) => e.id === lastId);
+      const lastIndex = existing.findIndex((e) => e.id === lastId);
       if (lastIndex !== -1) {
         paginated = existing.slice(lastIndex + 1);
       }

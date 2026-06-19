@@ -4,47 +4,80 @@ interface ComparisonCardProps {
   comparison: ComparisonResult;
 }
 
-const STATUS_CONFIG: Record<string, { color: string; icon: string; message: string }> = {
+const STATUS_CONFIG: Record<string, { badgeClass: string; message: string }> = {
   below: {
-    color: 'text-emerald-400',
-    icon: '✅',
-    message: 'Below average — great job!',
+    badgeClass: 'bg-[#3DDC97]/10 text-[#3DDC97] border-[#3DDC97]/20',
+    message: 'Below Average',
   },
   average: {
-    color: 'text-yellow-400',
-    icon: '➡️',
-    message: 'Around the national average',
+    badgeClass: 'bg-[#E8B84B]/10 text-[#E8B84B] border-[#E8B84B]/20',
+    message: 'Around Average',
   },
   above: {
-    color: 'text-red-400',
-    icon: '⚠️',
-    message: 'Above average — room to improve',
+    badgeClass: 'bg-[#E8634B]/10 text-[#E8634B] border-[#E8634B]/20',
+    message: 'Above Average',
   },
 };
 
 /**
  * Card component comparing the user's daily carbon output
- * against a national average. Color-codes the result as
- * below, average, or above, and shows the percentage difference.
+ * against a national average. Displays comparative progress bars
+ * and a badge representing status.
  */
 export default function ComparisonCard({ comparison }: ComparisonCardProps) {
   const config = STATUS_CONFIG[comparison.status];
+  
+  // Calculate relative widths for comparison bars
+  const maxVal = Math.max(comparison.userDaily, comparison.nationalAverage) * 1.2 || 1;
+  const userPct = Math.min((comparison.userDaily / maxVal) * 100, 100);
+  const avgPct = Math.min((comparison.nationalAverage / maxVal) * 100, 100);
 
   return (
     <div
-      className="bg-gray-900 rounded-xl p-4 border border-gray-800"
+      className="bg-[#131A16] rounded-xl p-5 border border-[rgba(255,255,255,0.08)] border-top-[1px] border-top-[rgba(255,255,255,0.06)] hover:bg-[#1A2420] hover:border-[rgba(255,255,255,0.14)] transition-all duration-150 ease-in-out"
       aria-label={`Comparison to ${comparison.country} average: ${comparison.status}`}
     >
-      <h3 className="text-sm font-medium text-gray-400 mb-2">vs {comparison.country} Average</h3>
-      <div className="flex items-center gap-2 mb-2">
-        <span className="text-lg">{config.icon}</span>
-        <span className={`text-lg font-bold ${config.color}`}>{config.message}</span>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[#8FA098]">vs {comparison.country} Average</h3>
+        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border uppercase tracking-wider ${config.badgeClass}`}>
+          {config.message}
+        </span>
       </div>
-      <div className="flex justify-between text-sm text-gray-500">
-        <span>You: {comparison.userDaily.toFixed(1)} kg</span>
-        <span>Avg: {comparison.nationalAverage.toFixed(1)} kg</span>
+
+      {/* Comparison Bars */}
+      <div className="space-y-3">
+        {/* User bar */}
+        <div>
+          <div className="flex justify-between text-[10px] uppercase tracking-wider text-[#8FA098] mb-1 font-semibold">
+            <span>You</span>
+            <span className="font-display text-[#F2F5F3] tabular-nums">{comparison.userDaily.toFixed(1)} kg</span>
+          </div>
+          <div className="h-1.5 w-full bg-[#0B0F0D] rounded-full overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-500 ${
+                comparison.status === 'below' ? 'bg-[#3DDC97]' : 'bg-[#E8634B]'
+              }`}
+              style={{ width: `${userPct}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Avg bar */}
+        <div>
+          <div className="flex justify-between text-[10px] uppercase tracking-wider text-[#8FA098] mb-1 font-semibold">
+            <span>{comparison.country} Avg</span>
+            <span className="font-display text-[#8FA098] tabular-nums">{comparison.nationalAverage.toFixed(1)} kg</span>
+          </div>
+          <div className="h-1.5 w-full bg-[#0B0F0D] rounded-full overflow-hidden">
+            <div
+              className="h-full bg-[#5C6962] rounded-full transition-all duration-500"
+              style={{ width: `${avgPct}%` }}
+            />
+          </div>
+        </div>
       </div>
-      <div className="mt-2 text-xs text-gray-600">
+
+      <div className="mt-4 text-xs text-[#8FA098]">
         {comparison.percentageDifference > 0 ? '+' : ''}
         {comparison.percentageDifference.toFixed(1)}% vs national average
       </div>

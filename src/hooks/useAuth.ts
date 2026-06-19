@@ -1,10 +1,5 @@
-/**
- * useAuth Hook
- * Firebase auth state management hook.
- */
-
 import { useState, useEffect, useCallback } from 'react';
-import type { User } from 'firebase/auth';
+import type { AuthUser } from '../services/authService';
 import {
   signIn as authSignIn,
   signOut as authSignOut,
@@ -12,7 +7,7 @@ import {
 } from '../services/authService';
 
 interface UseAuthReturn {
-  user: User | null;
+  user: AuthUser | null;
   loading: boolean;
   error: string | null;
   signIn: () => Promise<void>;
@@ -24,7 +19,7 @@ interface UseAuthReturn {
  * @returns Auth state and sign-in/sign-out functions
  */
 export function useAuth(): UseAuthReturn {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 

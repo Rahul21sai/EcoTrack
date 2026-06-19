@@ -110,20 +110,20 @@ describe('AuthGate Component', () => {
 describe('StreakBadge Component', () => {
   it('renders zero state prompt when streak is 0', () => {
     render(<StreakBadge streak={0} />);
-    expect(screen.getByText(/Start your streak/i)).toBeInTheDocument();
+    expect(screen.getByText(/start a streak/i)).toBeInTheDocument();
   });
 
   it('renders active streak count when streak is positive', () => {
     render(<StreakBadge streak={3} />);
     expect(screen.getByText('3')).toBeInTheDocument();
     expect(screen.getByText('day streak')).toBeInTheDocument();
-    expect(screen.queryByText(/Amazing consistency/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Consistency milestone/i)).not.toBeInTheDocument();
   });
 
   it('renders congratulatory message when streak is 7 or more', () => {
     render(<StreakBadge streak={7} />);
     expect(screen.getByText('7')).toBeInTheDocument();
-    expect(screen.getByText(/Amazing consistency/i)).toBeInTheDocument();
+    expect(screen.getByText(/Consistency milestone/i)).toBeInTheDocument();
   });
 });
 
@@ -138,9 +138,11 @@ describe('ComparisonCard Component', () => {
     };
     render(<ComparisonCard comparison={mockComparison} />);
     expect(screen.getByText(/Below average/i)).toBeInTheDocument();
-    expect(screen.getByText('You: 8.5 kg')).toBeInTheDocument();
-    expect(screen.getByText('Avg: 12.0 kg')).toBeInTheDocument();
-    expect(screen.getByText('-29.2% vs national average')).toBeInTheDocument();
+    expect(screen.getByText('You')).toBeInTheDocument();
+    expect(screen.getByText('8.5 kg')).toBeInTheDocument();
+    expect(screen.getByText('USA Avg')).toBeInTheDocument();
+    expect(screen.getByText('12.0 kg')).toBeInTheDocument();
+    expect(screen.getByText(/-29.2% vs national average/i)).toBeInTheDocument();
   });
 
   it('renders above national average comparison correctly', () => {
@@ -153,9 +155,11 @@ describe('ComparisonCard Component', () => {
     };
     render(<ComparisonCard comparison={mockComparison} />);
     expect(screen.getByText(/Above average/i)).toBeInTheDocument();
-    expect(screen.getByText('You: 15.0 kg')).toBeInTheDocument();
-    expect(screen.getByText('Avg: 12.0 kg')).toBeInTheDocument();
-    expect(screen.getByText('+25.0% vs national average')).toBeInTheDocument();
+    expect(screen.getByText('You')).toBeInTheDocument();
+    expect(screen.getByText('15.0 kg')).toBeInTheDocument();
+    expect(screen.getByText('USA Avg')).toBeInTheDocument();
+    expect(screen.getByText('12.0 kg')).toBeInTheDocument();
+    expect(screen.getByText(/\+25.0% vs national average/i)).toBeInTheDocument();
   });
 });
 

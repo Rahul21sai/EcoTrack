@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { Car, Zap, Utensils, Trash2, History, Trash } from 'lucide-react';
 import type { LogEntry } from '../types';
 import { formatCarbonValue, calculateDailyTotal } from '../utils/carbonEngine';
 
@@ -6,13 +7,6 @@ interface HistoryLogProps {
   entries: LogEntry[];
   onDelete: (entryId: string) => Promise<void>;
 }
-
-const CATEGORY_ICONS: Record<string, string> = {
-  transport: '🚗',
-  energy: '⚡',
-  food: '🍽️',
-  waste: '🗑️',
-};
 
 export default function HistoryLog({ entries, onDelete }: HistoryLogProps) {
   const handleDelete = useCallback(
@@ -23,10 +17,29 @@ export default function HistoryLog({ entries, onDelete }: HistoryLogProps) {
     [onDelete]
   );
 
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'transport':
+        return <Car className="w-4 h-4 text-[#3B82F6]" />;
+      case 'energy':
+        return <Zap className="w-4 h-4 text-[#F59E0B]" />;
+      case 'food':
+        return <Utensils className="w-4 h-4 text-[#10B981]" />;
+      case 'waste':
+        return <Trash2 className="w-4 h-4 text-[#EF4444]" />;
+      default:
+        return null;
+    }
+  };
+
   if (entries.length === 0) {
     return (
-      <div className="bg-gray-900 rounded-xl p-6 border border-gray-800 text-center">
-        <p className="text-gray-500">No entries logged yet. Start tracking your carbon footprint!</p>
+      <div className="bg-[#131A16] rounded-xl p-8 border border-[rgba(255,255,255,0.08)] border-top-[1px] border-top-[rgba(255,255,255,0.06)] text-center flex flex-col items-center justify-center min-h-[200px]">
+        <History className="w-8 h-8 text-[#5C6962] mb-3" />
+        <h4 className="text-sm font-bold font-display text-[#F2F5F3] mb-1">No entries yet</h4>
+        <p className="text-xs text-[#8FA098] max-w-[240px] leading-relaxed">
+          Start logging your activities to populate your carbon footprint history.
+        </p>
       </div>
     );
   }
@@ -47,48 +60,50 @@ export default function HistoryLog({ entries, onDelete }: HistoryLogProps) {
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-        <span>📋</span> History
+      <h3 className="text-xs font-semibold uppercase tracking-wider text-[#8FA098] flex items-center gap-2">
+        <History className="w-3.5 h-3.5 text-[#3DDC97]" /> History Log
       </h3>
-      {sortedDates.map((date) => (
-        <div key={date} className="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">
-          <div className="bg-gray-800/50 px-4 py-2 flex justify-between items-center">
-            <span className="text-sm font-medium text-gray-300">{date}</span>
-            <span className="text-sm text-emerald-400">
-              {formatCarbonValue(calculateDailyTotal(groupedEntries[date]))}
-            </span>
-          </div>
-          <div className="divide-y divide-gray-800">
-            {groupedEntries[date].map((entry) => (
-              <div
-                key={entry.id || `${entry.category}-${entry.value}`}
-                className="flex items-center justify-between px-4 py-3 hover:bg-gray-800/30 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <span>{CATEGORY_ICONS[entry.category] || '📌'}</span>
-                  <div>
-                    <p className="text-white text-sm font-medium capitalize">
-                      {entry.mode?.replace(/_/g, ' ')}
-                    </p>
-                    <p className="text-gray-500 text-xs">
-                      {entry.value} {entry.unit}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => handleDelete(entry.id)}
-                  className="text-gray-600 hover:text-red-400 transition-colors p-1"
-                  aria-label={`Delete entry: ${entry.mode}`}
+      <div className="space-y-3">
+        {sortedDates.map((date) => (
+          <div key={date} className="bg-[#131A16] rounded-xl border border-[rgba(255,255,255,0.08)] border-top-[1px] border-top-[rgba(255,255,255,0.06)] overflow-hidden">
+            <div className="bg-[#1A2420] px-4 py-2.5 flex justify-between items-center border-b border-[rgba(255,255,255,0.08)]">
+              <span className="text-xs font-bold font-display text-[#F2F5F3]">{date}</span>
+              <span className="text-xs font-bold font-display text-[#3DDC97] tabular-nums">
+                Total: {formatCarbonValue(calculateDailyTotal(groupedEntries[date]))}
+              </span>
+            </div>
+            <div className="divide-y divide-[rgba(255,255,255,0.06)]">
+              {groupedEntries[date].map((entry) => (
+                <div
+                  key={entry.id || `${entry.category}-${entry.value}`}
+                  className="flex items-center justify-between px-4 py-3 hover:bg-[#1A2420]/50 transition-colors"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                </button>
-              </div>
-            ))}
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.06)]">
+                      {getCategoryIcon(entry.category)}
+                    </div>
+                    <div>
+                      <p className="text-[#F2F5F3] text-xs font-semibold capitalize">
+                        {entry.mode?.replace(/_/g, ' ')}
+                      </p>
+                      <p className="text-[#8FA098] text-[10px] tabular-nums mt-0.5">
+                        {entry.value} {entry.unit}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleDelete(entry.id)}
+                    className="text-[#8FA098] hover:text-[#E8634B] transition-colors p-1.5 hover:bg-[rgba(255,255,255,0.03)] rounded-lg"
+                    aria-label={`Delete entry: ${entry.mode}`}
+                  >
+                    <Trash className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }

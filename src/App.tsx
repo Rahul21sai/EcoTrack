@@ -18,6 +18,7 @@ import RecommendationList from './components/RecommendationList';
 import { useAuth } from './hooks/useAuth';
 import { useEntries } from './hooks/useEntries';
 import { useRecommendations } from './hooks/useRecommendations';
+import { Leaf, BarChart3, PlusCircle, Lightbulb, History } from 'lucide-react';
 import {
   getCategoryBreakdown,
   calculateStreak,
@@ -99,36 +100,36 @@ function AppContent() {
     [removeEntry]
   );
 
-  const tabs: { id: Tab; label: string; icon: string }[] = [
-    { id: 'dashboard', label: 'Dashboard', icon: '📊' },
-    { id: 'log', label: 'Log Entry', icon: '📝' },
-    { id: 'recommendations', label: 'Tips', icon: '💡' },
-    { id: 'history', label: 'History', icon: '📋' },
+  const tabs = [
+    { id: 'dashboard' as Tab, label: 'Dashboard', Icon: BarChart3 },
+    { id: 'log' as Tab, label: 'Log Entry', Icon: PlusCircle },
+    { id: 'recommendations' as Tab, label: 'Tips', Icon: Lightbulb },
+    { id: 'history' as Tab, label: 'History', Icon: History },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-950">
+    <div className="min-h-screen bg-[#0B0F0D]">
       {/* Skip to main content — Accessibility */}
       <a href="#main-content" className="skip-to-main">
         Skip to main content
       </a>
 
       {/* Header */}
-      <header className="bg-gray-900 border-b border-gray-800 sticky top-0 z-40">
-        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+      <header className="bg-[#0B0F0D] border-b border-[rgba(255,255,255,0.08)] sticky top-0 z-40">
+        <div className="max-w-5xl mx-auto px-4 py-3.5 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="text-2xl">🌍</span>
-            <h1 className="text-xl font-bold text-white">EcoTrack</h1>
+            <Leaf className="w-5 h-5 text-[#3DDC97]" />
+            <h1 className="text-lg font-bold font-display text-[#F2F5F3] tracking-tight">EcoTrack</h1>
           </div>
           <div className="flex items-center gap-4">
             {user && (
               <>
-                <span className="text-sm text-gray-400 hidden sm:inline">
+                <span className="text-xs text-[#8FA098] hidden sm:inline">
                   {user.displayName || user.email}
                 </span>
                 <button
                   onClick={() => void signOut()}
-                  className="text-sm text-gray-500 hover:text-white transition-colors"
+                  className="text-xs font-semibold text-[#8FA098] hover:text-[#F2F5F3] transition-colors"
                   aria-label="Sign out"
                 >
                   Sign out
@@ -141,43 +142,46 @@ function AppContent() {
 
       {/* Tab navigation */}
       <nav
-        className="bg-gray-900/50 border-b border-gray-800"
+        className="bg-[#0B0F0D] border-b border-[rgba(255,255,255,0.08)]"
         aria-label="Main navigation"
       >
-        <div className="max-w-5xl mx-auto px-4 flex gap-1 overflow-x-auto">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all whitespace-nowrap border-b-2 ${
-                activeTab === tab.id
-                  ? 'text-emerald-400 border-emerald-400'
-                  : 'text-gray-500 border-transparent hover:text-gray-300'
-              }`}
-              aria-label={`Navigate to ${tab.label}`}
-              aria-current={activeTab === tab.id ? 'page' : undefined}
-            >
-              <span>{tab.icon}</span>
-              <span>{tab.label}</span>
-            </button>
-          ))}
+        <div className="max-w-5xl mx-auto px-4 flex gap-6 overflow-x-auto">
+          {tabs.map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-2 py-4 text-xs uppercase tracking-wider font-semibold transition-all whitespace-nowrap border-b-2 -mb-[2px] ${
+                  isActive
+                    ? 'text-[#3DDC97] border-[#3DDC97]'
+                    : 'text-[#8FA098] border-transparent hover:text-[#F2F5F3] hover:border-[rgba(255,255,255,0.14)]'
+                }`}
+                aria-label={`Navigate to ${tab.label}`}
+                aria-current={isActive ? 'page' : undefined}
+              >
+                <tab.Icon className="w-4 h-4" />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
         </div>
       </nav>
 
       {/* Main content */}
-      <main id="main-content" className="max-w-5xl mx-auto px-4 py-6">
+      <main id="main-content" className="max-w-5xl mx-auto px-4 py-8">
         {/* Dashboard tab */}
         {activeTab === 'dashboard' && (
-          <div className="space-y-6">
+          <div className="space-y-8">
             <DashboardSummary entries={entries} />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <CategoryBreakdownChart data={breakdown} />
-              <div className="space-y-4">
-                <StreakBadge streak={streak} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <CategoryBreakdownChart data={breakdown} onNavigateToLog={() => setActiveTab('log')} />
+              <div className="space-y-6">
+                <StreakBadge streak={streak} onNavigateToLog={() => setActiveTab('log')} />
                 <ComparisonCard comparison={comparison} />
               </div>
             </div>
-            <TrendChart data={trendData} />
+            <TrendChart data={trendData} onNavigateToLog={() => setActiveTab('log')} />
           </div>
         )}
 
@@ -211,12 +215,12 @@ function AppContent() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-900 border-t border-gray-800 mt-12">
-        <div className="max-w-5xl mx-auto px-4 py-6 text-center text-gray-600 text-sm">
+      <footer className="bg-[#131A16] border-t border-[rgba(255,255,255,0.08)] mt-16">
+        <div className="max-w-5xl mx-auto px-4 py-8 text-center text-[#5C6962] text-[11px] uppercase tracking-wider">
           <p>
             EcoTrack — Track, understand, and reduce your carbon footprint.
           </p>
-          <p className="mt-1">
+          <p className="mt-2 normal-case tracking-normal text-[#5C6962]/80">
             Built for the Google PromptWars Hackathon • Emission factors sourced from
             DEFRA, EPA, and peer-reviewed research.
           </p>

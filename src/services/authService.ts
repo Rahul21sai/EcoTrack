@@ -6,6 +6,7 @@
  */
 
 import { initializeApp } from 'firebase/app';
+import type { FirebaseApp } from 'firebase/app';
 import {
   getAuth,
   signInWithPopup,
@@ -13,7 +14,7 @@ import {
   signOut as firebaseSignOut,
   onAuthStateChanged,
 } from 'firebase/auth';
-import type { User } from 'firebase/auth';
+import type { Auth, User } from 'firebase/auth';
 import { clearAllCache } from '../utils/cache';
 
 const firebaseConfig = {
@@ -27,9 +28,9 @@ const firebaseConfig = {
 
 export const isFirebaseConfigured = !!firebaseConfig.apiKey;
 
-let app: any;
-let realAuth: any;
-let googleProvider: any;
+let app: FirebaseApp | undefined;
+let realAuth: Auth | null = null;
+let googleProvider: GoogleAuthProvider | undefined;
 
 if (isFirebaseConfigured) {
   try {
@@ -50,6 +51,8 @@ export interface DemoUser {
   photoURL: string | null;
 }
 
+export type AuthUser = User | DemoUser;
+
 // Demo mode state
 let demoUser: DemoUser | null = {
   uid: 'demo_user',
@@ -58,10 +61,10 @@ let demoUser: DemoUser | null = {
   photoURL: null,
 };
 
-const authListeners = new Set<(user: any) => void>();
+const authListeners = new Set<(user: AuthUser | null) => void>();
 
-export async function signIn(): Promise<any> {
-  if (isFirebaseConfigured && realAuth) {
+export async function signIn(): Promise<AuthUser> {
+  if (isFirebaseConfigured && realAuth && googleProvider) {
     const result = await signInWithPopup(realAuth, googleProvider);
     return result.user;
   } else {
@@ -87,10 +90,10 @@ export async function signOut(): Promise<void> {
 }
 
 export function onAuthChange(
-  callback: (user: any) => void
+  callback: (user: AuthUser | null) => void
 ): () => void {
   if (isFirebaseConfigured && realAuth) {
-    return onAuthStateChanged(realAuth, callback);
+    return onAuthStateChanged(realAuth, (u) => callback(u));
   } else {
     authListeners.add(callback);
     // Trigger callback immediately for demo mode

@@ -1,5 +1,22 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
+
+@theme {
+  --color-bg-base: #0B0F0D;
+  --color-surface-elevated: #131A16;
+  --color-surface-elevated-hover: #1A2420;
+  --color-border-subtle: rgba(255, 255, 255, 0.08);
+  --color-border-emphasis: rgba(255, 255, 255, 0.14);
+  --color-primary-accent: #3DDC97;
+  --color-warning-accent: #E8B84B;
+  --color-danger-accent: #E8634B;
+  --color-text-primary: #F2F5F3;
+  --color-text-secondary: #8FA098;
+  --color-text-tertiary: #5C6962;
+
+  --font-display: "Space Grotesk", sans-serif;
+  --font-sans: "Inter", sans-serif;
+}
 
 /* ── Base Styles ──────────────────────────────────────────────────────────── */
 
@@ -10,14 +27,14 @@
 }
 
 html {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
   color-scheme: dark;
   scroll-behavior: smooth;
 }
 
 body {
-  background-color: #030712;
-  color: #f9fafb;
+  background-color: #0B0F0D;
+  color: #F2F5F3;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -42,19 +59,18 @@ body {
   width: auto;
   height: auto;
   padding: 1rem 2rem;
-  background: #10b981;
-  color: #030712;
+  background: #3DDC97;
+  color: #0B0F0D;
   font-weight: 600;
   font-size: 1rem;
   z-index: 9999;
-  outline: 2px solid #34d399;
+  outline: 2px solid #3DDC97;
 }
 
 /* ── Focus Visible (Accessibility) ────────────────────────────────────────── */
-/* Never remove default focus ring — ensure visible focus on all interactive elements */
 
 :focus-visible {
-  outline: 2px solid #10b981;
+  outline: 2px solid #3DDC97;
   outline-offset: 2px;
 }
 
@@ -65,21 +81,42 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #1f2937;
+  background: #0B0F0D;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #374151;
+  background: #131A16;
+  border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #4b5563;
+  background: #1A2420;
 }
 
 /* ── Selection ────────────────────────────────────────────────────────────── */
 
 ::selection {
-  background: #10b981;
-  color: #030712;
+  background: #3DDC97;
+  color: #0B0F0D;
+}
+
+/* ── Custom Terminal Classes ───────────────────────────────────────────────── */
+
+.terminal-card {
+  background-color: #131A16;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 20px;
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+.terminal-card:hover {
+  background-color: #1A2420;
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
 }

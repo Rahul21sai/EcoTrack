@@ -1,14 +1,16 @@
 import { memo } from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { PieChart as PieChartIcon } from 'lucide-react';
 import type { CategoryBreakdown } from '../types';
 import { CATEGORIES } from '../utils/constants';
 import { formatCarbonValue } from '../utils/carbonEngine';
 
 interface CategoryBreakdownChartProps {
   data: CategoryBreakdown;
+  onNavigateToLog?: () => void;
 }
 
-function CategoryBreakdownChartInner({ data }: CategoryBreakdownChartProps) {
+function CategoryBreakdownChartInner({ data, onNavigateToLog }: CategoryBreakdownChartProps) {
   const chartData = CATEGORIES.map((cat) => ({
     name: cat.label,
     value: Number(data[cat.id].toFixed(2)),
@@ -20,24 +22,36 @@ function CategoryBreakdownChartInner({ data }: CategoryBreakdownChartProps) {
 
   if (total === 0) {
     return (
-      <div className="bg-gray-900 rounded-xl p-6 border border-gray-800 text-center">
-        <p className="text-gray-500">No data to display yet. Log some entries to see your breakdown!</p>
+      <div className="bg-[#131A16] rounded-xl p-8 border border-[rgba(255,255,255,0.08)] border-top-[1px] border-top-[rgba(255,255,255,0.06)] min-h-[340px] flex flex-col items-center justify-center text-center">
+        <PieChartIcon className="w-8 h-8 text-[#5C6962] mb-4" />
+        <h4 className="text-sm font-bold font-display text-[#F2F5F3] mb-1">No entries yet</h4>
+        <p className="text-xs text-[#8FA098] max-w-[240px] mb-4 leading-relaxed">
+          Log your first action to see your breakdown.
+        </p>
+        {onNavigateToLog && (
+          <button
+            onClick={onNavigateToLog}
+            className="text-xs font-semibold text-[#3DDC97] hover:underline flex items-center gap-1 transition-all"
+          >
+            Log entry <span aria-hidden="true">→</span>
+          </button>
+        )}
       </div>
     );
   }
 
   const ariaDescription = chartData
-    .map((d) => `${d.name}: ${formatCarbonValue(d.value)}`)
+    .map((item) => `${item.name}: ${formatCarbonValue(item.value)}`)
     .join(', ');
 
   return (
     <div
-      className="bg-gray-900 rounded-xl p-6 border border-gray-800"
+      className="bg-[#131A16] rounded-xl p-5 border border-[rgba(255,255,255,0.08)] border-top-[1px] border-top-[rgba(255,255,255,0.06)] hover:bg-[#1A2420] hover:border-[rgba(255,255,255,0.14)] transition-all duration-150 ease-in-out"
       aria-label={`Pie chart showing carbon emissions by category: ${ariaDescription}`}
     >
-      <h3 className="text-lg font-semibold text-white mb-4">Category Breakdown</h3>
+      <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[#8FA098] mb-4">Emissions by Category</h3>
       <ResponsiveContainer width="100%" height={280}>
-        <PieChart>
+        <RechartsPieChart>
           <Pie
             data={chartData}
             cx="50%"
@@ -54,17 +68,17 @@ function CategoryBreakdownChartInner({ data }: CategoryBreakdownChartProps) {
           </Pie>
           <Tooltip
             contentStyle={{
-              backgroundColor: '#1f2937',
-              border: '1px solid #374151',
+              backgroundColor: '#131A16',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
               borderRadius: '8px',
-              color: '#fff',
+              color: '#F2F5F3',
             }}
             formatter={(val: unknown) => [formatCarbonValue(Number(val as number) || 0), 'Emissions']}
           />
           <Legend
-            formatter={(value: string) => <span style={{ color: '#d1d5db' }}>{value}</span>}
+            formatter={(value: string) => <span style={{ color: '#8FA098', fontSize: '11px', fontWeight: 500, textTransform: 'uppercase' }}>{value}</span>}
           />
-        </PieChart>
+        </RechartsPieChart>
       </ResponsiveContainer>
     </div>
   );

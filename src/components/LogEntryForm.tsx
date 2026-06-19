@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import type { FormEvent } from 'react';
+import { PlusCircle } from 'lucide-react';
 import type { LogEntry, EmissionCategory, EntryMode } from '../types';
 import { validateLogEntry, sanitizeNumericInput } from '../utils/carbonEngine';
 import { stripHTML } from '../utils/sanitize';
@@ -158,16 +159,16 @@ export default function LogEntryForm({ onSubmit, todayEntryCount = 0 }: LogEntry
       role="form"
       aria-label="Log carbon footprint entry"
       onSubmit={(e) => void handleSubmit(e)}
-      className="bg-gray-900 rounded-2xl p-6 border border-gray-800 shadow-xl"
+      className="bg-[#131A16] rounded-xl p-5 border border-[rgba(255,255,255,0.08)] border-top-[1px] border-top-[rgba(255,255,255,0.06)]"
     >
-      <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-        <span>📝</span> Log Entry
+      <h2 className="text-xs font-semibold uppercase tracking-wider text-[#8FA098] mb-4 flex items-center gap-2 font-display">
+        <PlusCircle className="w-4 h-4 text-[#3DDC97]" /> Log Entry
       </h2>
 
       {/* Validation errors */}
       {errors.length > 0 && (
         <div
-          className="bg-red-900/30 border border-red-700 text-red-400 p-3 rounded-lg mb-4"
+          className="bg-[#E8634B]/10 border border-[#E8634B]/20 text-[#E8634B] p-3 rounded-lg mb-4 text-xs"
           role="alert"
           aria-live="polite"
         >
@@ -179,14 +180,14 @@ export default function LogEntryForm({ onSubmit, todayEntryCount = 0 }: LogEntry
 
       {/* Category selector */}
       <div className="mb-4">
-        <label htmlFor="category" className="block text-sm font-medium text-gray-300 mb-1">
+        <label htmlFor="category" className="block text-xs font-semibold uppercase tracking-wider text-[#8FA098] mb-1.5">
           Category
         </label>
         <select
           id="category"
           value={category}
           onChange={(e) => handleCategoryChange(e.target.value)}
-          className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all"
+          className="w-full bg-[#0B0F0D] border border-[rgba(255,255,255,0.08)] text-[#F2F5F3] rounded-lg px-4 py-2.5 focus:border-[#3DDC97] focus:ring-1 focus:ring-[#3DDC97] outline-none transition-all text-sm"
           aria-label="Select emission category"
           required
         >
@@ -202,14 +203,14 @@ export default function LogEntryForm({ onSubmit, todayEntryCount = 0 }: LogEntry
       {/* Mode selector */}
       {category && (
         <div className="mb-4">
-          <label htmlFor="mode" className="block text-sm font-medium text-gray-300 mb-1">
+          <label htmlFor="mode" className="block text-xs font-semibold uppercase tracking-wider text-[#8FA098] mb-1.5">
             Type
           </label>
           <select
             id="mode"
             value={mode}
             onChange={(e) => setMode(e.target.value as EntryMode)}
-            className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all"
+            className="w-full bg-[#0B0F0D] border border-[rgba(255,255,255,0.08)] text-[#F2F5F3] rounded-lg px-4 py-2.5 focus:border-[#3DDC97] focus:ring-1 focus:ring-[#3DDC97] outline-none transition-all text-sm"
             aria-label="Select specific type"
             required
           >
@@ -225,7 +226,7 @@ export default function LogEntryForm({ onSubmit, todayEntryCount = 0 }: LogEntry
 
       {/* Value input */}
       <div className="mb-4">
-        <label htmlFor="value" className="block text-sm font-medium text-gray-300 mb-1">
+        <label htmlFor="value" className="block text-xs font-semibold uppercase tracking-wider text-[#8FA098] mb-1.5">
           Value {category ? `(${UNITS[category] || ''})` : ''}
         </label>
         <input
@@ -235,14 +236,16 @@ export default function LogEntryForm({ onSubmit, todayEntryCount = 0 }: LogEntry
           value={value}
           onChange={(e) => handleValueChange(e.target.value)}
           placeholder={category ? `Enter ${UNITS[category] || 'amount'}...` : 'Enter amount...'}
-          className={`w-full bg-gray-800 border text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all ${
-            valueWarning ? 'border-red-500 focus:ring-red-500' : 'border-gray-700'
+          className={`w-full bg-[#0B0F0D] border text-[#F2F5F3] rounded-lg px-4 py-2.5 focus:ring-1 outline-none transition-all text-sm ${
+            valueWarning 
+              ? 'border-[#E8634B] focus:border-[#E8634B] focus:ring-[#E8634B]' 
+              : 'border-[rgba(255,255,255,0.08)] focus:border-[#3DDC97] focus:ring-[#3DDC97]'
           }`}
           aria-label="Enter value"
           required
         />
         {valueWarning && (
-          <p className="text-red-400 text-xs mt-1" role="alert" aria-live="polite">
+          <p className="text-[#E8634B] text-xs mt-1" role="alert" aria-live="polite">
             {valueWarning}
           </p>
         )}
@@ -250,7 +253,7 @@ export default function LogEntryForm({ onSubmit, todayEntryCount = 0 }: LogEntry
 
       {/* Date input */}
       <div className="mb-6">
-        <label htmlFor="date" className="block text-sm font-medium text-gray-300 mb-1">
+        <label htmlFor="date" className="block text-xs font-semibold uppercase tracking-wider text-[#8FA098] mb-1.5">
           Date
         </label>
         <input
@@ -259,7 +262,7 @@ export default function LogEntryForm({ onSubmit, todayEntryCount = 0 }: LogEntry
           value={date}
           onChange={(e) => setDate(e.target.value)}
           max={new Date().toISOString().split('T')[0]}
-          className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all"
+          className="w-full bg-[#0B0F0D] border border-[rgba(255,255,255,0.08)] text-[#F2F5F3] rounded-lg px-4 py-2.5 focus:border-[#3DDC97] focus:ring-1 focus:ring-[#3DDC97] outline-none transition-all text-sm"
           aria-label="Select date"
           required
         />
@@ -269,7 +272,7 @@ export default function LogEntryForm({ onSubmit, todayEntryCount = 0 }: LogEntry
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-emerald-500/20"
+        className="w-full bg-[#3DDC97] hover:bg-[#2cb27a] disabled:bg-[#1A2420] disabled:text-[#5C6962] disabled:cursor-not-allowed text-[#0B0F0D] font-bold py-2.5 px-4 rounded-lg transition-colors font-display text-sm"
         aria-label="Log entry"
       >
         {isSubmitting ? 'Saving...' : 'Log Entry'}

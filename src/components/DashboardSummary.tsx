@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { CalendarDays, TrendingDown, BarChart3 } from 'lucide-react';
 import type { LogEntry } from '../types';
 import {
   calculateDailyTotal,
@@ -11,17 +12,24 @@ interface DashboardSummaryProps {
 }
 
 const IMPACT_COLORS: Record<string, string> = {
-  low: 'text-emerald-400',
-  moderate: 'text-yellow-400',
-  high: 'text-orange-400',
-  'very-high': 'text-red-400',
+  low: 'text-[#3DDC97]',
+  moderate: 'text-[#E8B84B]',
+  high: 'text-[#E8634B]',
+  'very-high': 'text-[#E8634B]',
 };
 
-const IMPACT_BG: Record<string, string> = {
-  low: 'bg-emerald-900/30 border-emerald-700',
-  moderate: 'bg-yellow-900/30 border-yellow-700',
-  high: 'bg-orange-900/30 border-orange-700',
-  'very-high': 'bg-red-900/30 border-red-700',
+const IMPACT_DOT_BG: Record<string, string> = {
+  low: 'bg-[#3DDC97]',
+  moderate: 'bg-[#E8B84B]',
+  high: 'bg-[#E8634B]',
+  'very-high': 'bg-[#E8634B]',
+};
+
+const IMPACT_RADIAL_BG: Record<string, string> = {
+  low: 'rgba(61, 220, 151, 0.05)',
+  moderate: 'rgba(232, 184, 75, 0.05)',
+  high: 'rgba(232, 99, 75, 0.05)',
+  'very-high': 'rgba(232, 99, 75, 0.05)',
 };
 
 /**
@@ -57,37 +65,43 @@ export default function DashboardSummary({ entries }: DashboardSummaryProps) {
   }, [entries, today]);
 
   const stats = [
-    { label: 'Today', value: formatCarbonValue(todayTotal), icon: '📊' },
-    { label: 'This Week', value: formatCarbonValue(weekTotal), icon: '📅' },
-    { label: 'This Month', value: formatCarbonValue(monthTotal), icon: '🗓️' },
+    { label: 'Today', value: formatCarbonValue(todayTotal), Icon: TrendingDown },
+    { label: 'This Week', value: formatCarbonValue(weekTotal), Icon: CalendarDays },
+    { label: 'This Month', value: formatCarbonValue(monthTotal), Icon: BarChart3 },
   ];
 
   return (
-    <div className="space-y-4">
-      {/* Impact badge */}
+    <div className="space-y-6">
+      {/* Impact badge Hero Card */}
       <div
-        className={`p-4 rounded-xl border ${IMPACT_BG[impact]}`}
+        className="relative overflow-hidden p-8 rounded-xl border border-[rgba(255,255,255,0.08)] bg-[#131A16] transition-all duration-200"
+        style={{
+          background: `radial-gradient(circle at top right, ${IMPACT_RADIAL_BG[impact]} 0%, #131A16 70%)`
+        }}
         aria-label={`Your daily impact level is ${impact}`}
       >
-        <p className="text-sm text-gray-400">Today's Impact Level</p>
-        <p className={`text-2xl font-bold capitalize ${IMPACT_COLORS[impact]}`}>
-          {impact.replace('-', ' ')}
-        </p>
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-[#8FA098] mb-2">Today's Impact Level</p>
+        <div className="flex items-center gap-4">
+          <span className={`w-3.5 h-3.5 rounded-full ${IMPACT_DOT_BG[impact]}`} />
+          <h2 className={`text-5xl font-bold font-display tracking-tight capitalize ${IMPACT_COLORS[impact]}`}>
+            {impact.replace('-', ' ')}
+          </h2>
+        </div>
       </div>
 
-      {/* Stats grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {/* Stats grid (responsive under 640px, 640px-1024px, above 1024px) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {stats.map((stat) => (
           <div
             key={stat.label}
-            className="bg-gray-900 rounded-xl p-4 border border-gray-800"
+            className="bg-[#131A16] rounded-xl p-5 border border-[rgba(255,255,255,0.08)] border-top-[1px] border-top-[rgba(255,255,255,0.06)] hover:bg-[#1A2420] hover:border-[rgba(255,255,255,0.14)] transition-all duration-150 ease-in-out"
             aria-label={`${stat.label}: ${stat.value}`}
           >
-            <div className="flex items-center gap-2 mb-1">
-              <span>{stat.icon}</span>
-              <span className="text-sm text-gray-400">{stat.label}</span>
+            <div className="flex items-center gap-2 text-[#8FA098] mb-3">
+              <stat.Icon className="w-4 h-4 text-[#8FA098]" />
+              <span className="text-[11px] font-semibold uppercase tracking-wider">{stat.label}</span>
             </div>
-            <p className="text-xl font-bold text-white">{stat.value}</p>
+            <p className="text-3xl font-bold font-display text-[#F2F5F3] tabular-nums">{stat.value}</p>
           </div>
         ))}
       </div>
