@@ -1,8 +1,14 @@
 /**
  * EcoTrack Authentication Service
- * Handles Firebase Auth with Google Sign-In (free tier).
- * Automatically falls back to a simulated demo-mode auth if credentials are not configured,
- * preventing blank-screen crashes.
+ *
+ * Wraps Firebase Auth with Google Sign-In (OAuth 2.0 popup flow).
+ * Automatically falls back to a simulated demo-mode user if Firebase credentials
+ * are not configured, preventing blank-screen failures in development or demo deployments.
+ *
+ * Architecture decision: Demo mode is implemented at this layer, not in components,
+ * so components never need to know whether they are talking to real Firebase or a mock.
+ *
+ * @module authService
  */
 
 import { initializeApp } from 'firebase/app';
@@ -63,6 +69,14 @@ let demoUser: DemoUser | null = {
 
 const authListeners = new Set<(user: AuthUser | null) => void>();
 
+/**
+ * Initiates Google Sign-In via Firebase Auth popup.
+ * Falls back to a demo user object if Firebase is not configured.
+ *
+ * @returns Promise resolving to the authenticated user (real or demo)
+ * @throws {Error} If Firebase is configured but the sign-in popup fails
+ *   (e.g., popup blocked, network error, user dismissed dialog)
+ */
 export async function signIn(): Promise<AuthUser> {
   if (isFirebaseConfigured && realAuth && googleProvider) {
     const result = await signInWithPopup(realAuth, googleProvider);
@@ -79,6 +93,13 @@ export async function signIn(): Promise<AuthUser> {
   }
 }
 
+/**
+ * Signs the current user out and clears all in-memory and localStorage caches.
+ * In demo mode, resets the demo user to null and notifies all listeners.
+ *
+ * @returns Promise that resolves when sign-out completes
+ * @throws {Error} If Firebase sign-out call fails (network error)
+ */
 export async function signOut(): Promise<void> {
   clearAllCache();
   if (isFirebaseConfigured && realAuth) {
@@ -89,6 +110,17 @@ export async function signOut(): Promise<void> {
   }
 }
 
+/**
+ * Subscribes to authentication state changes. The callback is invoked
+ * immediately with the current user, then on every subsequent sign-in/sign-out.
+ *
+ * In Firebase mode, wraps `onAuthStateChanged`.
+ * In demo mode, triggers the callback immediately with the demo user and tracks
+ * all listeners in a local Set for manual notification.
+ *
+ * @param callback - Function called with the current user (or null if signed out)
+ * @returns Unsubscribe function — call it to stop listening and prevent memory leaks
+ */
 export function onAuthChange(
   callback: (user: AuthUser | null) => void
 ): () => void {

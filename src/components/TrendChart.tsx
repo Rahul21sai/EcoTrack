@@ -29,7 +29,7 @@ function TrendChartInner({ data, onNavigateToLog }: TrendChartProps) {
     const singleDate = data[0]?.date;
     const dayEntries = entries.filter((e) => e.date === singleDate);
     if (dayEntries.length === 0) return '#3DDC97';
-    const primaryCatId = dayEntries[0].category;
+    const primaryCatId = dayEntries[0]?.category;
     const catMeta = CATEGORIES.find((c) => c.id === primaryCatId);
     return catMeta ? catMeta.color : '#3DDC97';
   };

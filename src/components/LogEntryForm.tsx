@@ -42,7 +42,10 @@ export default function LogEntryForm({ onSubmit, todayEntryCount = 0 }: LogEntry
   const [category, setCategory] = useState<EmissionCategory | ''>('');
   const [mode, setMode] = useState<EntryMode | ''>('');
   const [value, setValue] = useState<string>('');
-  const [date, setDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState<string>(
+    // Non-null assertion safe: ISO strings always contain 'T'
+    new Date().toISOString().split('T')[0]!
+  );
   const [errors, setErrors] = useState<string[]>([]);
   const [valueWarning, setValueWarning] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -140,7 +143,8 @@ export default function LogEntryForm({ onSubmit, todayEntryCount = 0 }: LogEntry
         setCategory('');
         setMode('');
         setValue('');
-        setDate(new Date().toISOString().split('T')[0]);
+        // Non-null assertion safe: ISO strings always contain 'T'
+        setDate(new Date().toISOString().split('T')[0]!);
         setErrors([]);
       } catch (err) {
         setErrors([err instanceof Error ? err.message : 'Failed to save entry']);
@@ -261,7 +265,8 @@ export default function LogEntryForm({ onSubmit, todayEntryCount = 0 }: LogEntry
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
-          max={new Date().toISOString().split('T')[0]}
+          // Non-null assertion safe: ISO strings always contain 'T'
+          max={new Date().toISOString().split('T')[0]!}
           className="w-full bg-[#0B0F0D] border border-[rgba(255,255,255,0.08)] text-[#F2F5F3] rounded-lg px-4 py-2.5 focus:border-[#3DDC97] focus:ring-1 focus:ring-[#3DDC97] outline-none transition-all text-sm"
           aria-label="Select date"
           required

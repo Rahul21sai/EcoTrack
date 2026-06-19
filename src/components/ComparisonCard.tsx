@@ -1,6 +1,16 @@
+/**
+ * ComparisonCard Component
+ *
+ * Displays a side-by-side comparison of the user's daily carbon output
+ * against their country's national average. Shows progress bars and a
+ * status badge (Below / Around / Above Average).
+ */
+import type { ReactElement } from 'react';
 import type { ComparisonResult } from '../types';
 
+/** Props for the ComparisonCard component */
 interface ComparisonCardProps {
+  /** Comparison result computed from the user's daily total */
   comparison: ComparisonResult;
 }
 
@@ -19,13 +29,14 @@ const STATUS_CONFIG: Record<string, { badgeClass: string; message: string }> = {
   },
 };
 
+/** Default config used when status does not match any key (defensive fallback) */
+const DEFAULT_STATUS_CONFIG = STATUS_CONFIG['average']!;
+
 /**
- * Card component comparing the user's daily carbon output
- * against a national average. Displays comparative progress bars
- * and a badge representing status.
+ * Renders the comparison card for the Dashboard.
  */
-export default function ComparisonCard({ comparison }: ComparisonCardProps) {
-  const config = STATUS_CONFIG[comparison.status];
+export default function ComparisonCard({ comparison }: ComparisonCardProps): ReactElement {
+  const config = STATUS_CONFIG[comparison.status] ?? DEFAULT_STATUS_CONFIG;
   
   // Calculate relative widths for comparison bars
   const maxVal = Math.max(comparison.userDaily, comparison.nationalAverage) * 1.2 || 1;

@@ -27,6 +27,7 @@ import type {
   ImpactLevel,
   CategoryBreakdown,
 } from '../types';
+import { CarbonCalculationError } from './errors';
 
 import {
   TRANSPORT_EMISSION_FACTORS,
@@ -46,10 +47,13 @@ import {
 /**
  * Calculate CO2e emissions for a transport journey.
  *
+ * Uses DEFRA 2023 per-km emission factors. Pure function — no side effects,
+ * safe to call repeatedly for live recalculation as the user edits form inputs.
+ *
  * @param mode - The transport mode (e.g., 'car_petrol', 'bus', 'bicycle')
- * @param km - Distance traveled in kilometers
+ * @param km - Distance traveled in kilometers, must be ≥ 0
  * @returns Emissions in kg CO2e
- * @throws {Error} If km is negative
+ * @throws {CarbonCalculationError} If km is negative
  *
  * @example
  * calculateTransportEmission('car_petrol', 100) // → 19.2 kg CO2e
@@ -62,10 +66,10 @@ export function calculateTransportEmission(
   km: number
 ): number {
   if (km < 0) {
-    throw new Error('Distance cannot be negative');
+    throw new CarbonCalculationError('Distance cannot be negative');
   }
   const factor = TRANSPORT_EMISSION_FACTORS[mode];
-  return factor * km;
+  return (factor ?? 0) * km;
 }
 
 // ── Energy ───────────────────────────────────────────────────────────────────
@@ -73,10 +77,12 @@ export function calculateTransportEmission(
 /**
  * Calculate CO2e emissions for energy consumption.
  *
+ * Maps energy source type to an EPA/DEFRA emission factor. Pure function.
+ *
  * @param type - The energy source type ('electricity' or 'natural_gas')
- * @param kwh - Energy consumed in kilowatt-hours
+ * @param kwh - Energy consumed in kilowatt-hours, must be ≥ 0
  * @returns Emissions in kg CO2e
- * @throws {Error} If kwh is negative
+ * @throws {CarbonCalculationError} If kwh is negative
  *
  * @example
  * calculateEnergyEmission('electricity', 10) // → 4.75 kg CO2e
@@ -85,10 +91,10 @@ export function calculateTransportEmission(
  */
 export function calculateEnergyEmission(type: EnergyType, kwh: number): number {
   if (kwh < 0) {
-    throw new Error('Energy consumption cannot be negative');
+    throw new CarbonCalculationError('Energy consumption cannot be negative');
   }
   const factor = ENERGY_EMISSION_FACTORS[type];
-  return factor * kwh;
+  return (factor ?? 0) * kwh;
 }
 
 // ── Food ─────────────────────────────────────────────────────────────────────
@@ -96,10 +102,14 @@ export function calculateEnergyEmission(type: EnergyType, kwh: number): number {
 /**
  * Calculate CO2e emissions for food consumption.
  *
+ * Applies per-meal emission factors based on Poore & Nemecek's landmark 2018
+ * meta-analysis covering 38,700 farms and 40 food products across 119 countries.
+ * Pure function — no side effects.
+ *
  * @param mealType - The meal type ('meat_heavy', 'vegetarian', etc.)
- * @param count - Number of meals consumed
+ * @param count - Number of meals consumed, must be ≥ 0
  * @returns Emissions in kg CO2e
- * @throws {Error} If count is negative
+ * @throws {CarbonCalculationError} If count is negative
  *
  * @example
  * calculateFoodEmission('meat_heavy', 1) // → 7.2 kg CO2e
@@ -112,10 +122,10 @@ export function calculateFoodEmission(
   count: number
 ): number {
   if (count < 0) {
-    throw new Error('Meal count cannot be negative');
+    throw new CarbonCalculationError('Meal count cannot be negative');
   }
   const factor = FOOD_EMISSION_FACTORS[mealType];
-  return factor * count;
+  return (factor ?? 0) * count;
 }
 
 // ── Waste ────────────────────────────────────────────────────────────────────
@@ -123,10 +133,13 @@ export function calculateFoodEmission(
 /**
  * Calculate CO2e emissions for waste disposal.
  *
+ * Accounts for both direct emissions from decomposition and methane generation
+ * in landfills. Recycling and composting emit significantly less. Pure function.
+ *
  * @param type - The waste disposal method ('landfill', 'recycled', 'composted')
- * @param kg - Weight of waste in kilograms
+ * @param kg - Weight of waste in kilograms, must be ≥ 0
  * @returns Emissions in kg CO2e
- * @throws {Error} If kg is negative
+ * @throws {CarbonCalculationError} If kg is negative
  *
  * @example
  * calculateWasteEmission('landfill', 5) // → 2.9 kg CO2e
@@ -135,10 +148,10 @@ export function calculateFoodEmission(
  */
 export function calculateWasteEmission(type: WasteType, kg: number): number {
   if (kg < 0) {
-    throw new Error('Waste weight cannot be negative');
+    throw new CarbonCalculationError('Waste weight cannot be negative');
   }
   const factor = WASTE_EMISSION_FACTORS[type];
-  return factor * kg;
+  return (factor ?? 0) * kg;
 }
 
 // ── Aggregation ──────────────────────────────────────────────────────────────
@@ -223,7 +236,8 @@ export function compareToNationalAverage(
   userDaily: number,
   country: string
 ): ComparisonResult {
-  const avgData = NATIONAL_AVERAGES[country] || NATIONAL_AVERAGES[DEFAULT_COUNTRY];
+  // DEFAULT_COUNTRY is always defined in NATIONAL_AVERAGES — non-null assertion is safe here
+  const avgData = NATIONAL_AVERAGES[country] ?? NATIONAL_AVERAGES[DEFAULT_COUNTRY]!;
   const nationalAverage = avgData.dailyAverageKg;
   const difference = userDaily - nationalAverage;
   const percentageDifference =
@@ -581,8 +595,11 @@ export function calculateStreak(logDates: string[]): number {
 
   let streak = 1;
   for (let i = 0; i < uniqueDates.length - 1; i++) {
-    const currentDate = new Date(uniqueDates[i]);
-    const nextDate = new Date(uniqueDates[i + 1]);
+    // Non-null assertions safe here: loop bounds guarantee i and i+1 are in range
+    const currentDateStr = uniqueDates[i]!;
+    const nextDateStr = uniqueDates[i + 1]!;
+    const currentDate = new Date(currentDateStr);
+    const nextDate = new Date(nextDateStr);
     const diffMs = currentDate.getTime() - nextDate.getTime();
     const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
 

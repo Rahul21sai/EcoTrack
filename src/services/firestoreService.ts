@@ -29,6 +29,7 @@ import type {
 import { auth, isFirebaseConfigured } from './authService';
 import type { LogEntry, UserProfile } from '../types';
 import { ENTRIES_PER_PAGE } from '../utils/constants';
+import { FirestoreServiceError } from '../utils/errors';
 
 const db = isFirebaseConfigured ? getFirestore() : null;
 
@@ -52,13 +53,18 @@ class MockQueryDocumentSnapshot {
 /**
  * Save a new log entry to Firestore under the current user's collection,
  * or LocalStorage if Firebase is not configured.
- * @param entry - The log entry data to save
- * @returns The document ID of the saved entry
- * @throws If user is not authenticated
+ *
+ * Uses server timestamps on Firestore writes so entries are ordered by
+ * actual server time, preventing client-clock skew issues.
+ *
+ * @param entry - The log entry data to save (without id, userId, or createdAt)
+ * @returns Promise resolving to the Firestore document ID of the saved entry
+ * @throws {FirestoreServiceError} If user is not authenticated
+ * @throws {FirestoreServiceError} If the Firestore write fails
  */
 export async function saveEntry(entry: Omit<LogEntry, 'id' | 'userId' | 'createdAt'>): Promise<string> {
   const user = auth.currentUser;
-  if (!user) throw new Error('User must be authenticated to save entries');
+  if (!user) throw new FirestoreServiceError('User must be authenticated to save entries', 'unauthenticated');
 
   if (isFirebaseConfigured && db) {
     const entriesRef = collection(db, 'users', user.uid, 'entries');
@@ -89,15 +95,21 @@ export async function saveEntry(entry: Omit<LogEntry, 'id' | 'userId' | 'created
 }
 
 /**
- * Get paginated entries for the current user, ordered by date descending.
- * @param lastDoc - Last document from previous page (for pagination)
- * @returns Object with entries array and last document for next page
+ * Get paginated entries for the current user, ordered by creation date descending.
+ *
+ * Uses Firestore cursor-based pagination (startAfter) for O(1) page loads.
+ * Falls back to manual slicing of a localStorage array in demo mode.
+ *
+ * @param lastDoc - Last document from the previous page, used for cursor-based pagination
+ * @returns Promise resolving to entries array and optional cursor for the next page
+ * @throws {FirestoreServiceError} If user is not authenticated
+ * @throws {FirestoreServiceError} If the Firestore query fails
  */
 export async function getEntries(
   lastDoc?: DocumentSnapshot
 ): Promise<{ entries: LogEntry[]; lastDocument: QueryDocumentSnapshot | null }> {
   const user = auth.currentUser;
-  if (!user) throw new Error('User must be authenticated to read entries');
+  if (!user) throw new FirestoreServiceError('User must be authenticated to read entries', 'unauthenticated');
 
   if (isFirebaseConfigured && db) {
     const entriesRef = collection(db, 'users', user.uid, 'entries');
@@ -124,9 +136,10 @@ export async function getEntries(
       ...docSnap.data(),
     })) as LogEntry[];
 
+    // Non-null assertion safe: we check length > 0 before accessing the last element
     const lastDocument =
       snapshot.docs.length > 0
-        ? snapshot.docs[snapshot.docs.length - 1]
+        ? snapshot.docs[snapshot.docs.length - 1]!
         : null;
 
     return { entries, lastDocument };
@@ -165,12 +178,19 @@ export async function getEntries(
 }
 
 /**
- * Delete a log entry by ID.
+ * Delete a log entry by its document ID.
+ *
+ * Performs a hard delete from Firestore (not soft delete). Callers should
+ * implement optimistic UI updates before calling this function.
+ *
  * @param entryId - The Firestore document ID to delete
+ * @returns Promise that resolves when the entry is deleted
+ * @throws {FirestoreServiceError} If user is not authenticated
+ * @throws {FirestoreServiceError} If the Firestore delete operation fails
  */
 export async function deleteEntry(entryId: string): Promise<void> {
   const user = auth.currentUser;
-  if (!user) throw new Error('User must be authenticated to delete entries');
+  if (!user) throw new FirestoreServiceError('User must be authenticated to delete entries', 'unauthenticated');
 
   if (isFirebaseConfigured && db) {
     const entryRef = doc(db, 'users', user.uid, 'entries', entryId);
@@ -188,16 +208,23 @@ export async function deleteEntry(entryId: string): Promise<void> {
 }
 
 /**
- * Update an existing log entry.
+ * Update an existing log entry with partial data.
+ *
+ * Uses Firestore's `updateDoc` for atomic partial updates — only provided
+ * fields are overwritten; other fields are preserved.
+ *
  * @param entryId - The Firestore document ID to update
- * @param data - Partial entry data to update
+ * @param data - Partial entry data to merge into the existing document
+ * @returns Promise that resolves when the entry is updated
+ * @throws {FirestoreServiceError} If user is not authenticated
+ * @throws {FirestoreServiceError} If the Firestore update fails
  */
 export async function updateEntry(
   entryId: string,
   data: Partial<Omit<LogEntry, 'id' | 'userId'>>
 ): Promise<void> {
   const user = auth.currentUser;
-  if (!user) throw new Error('User must be authenticated to update entries');
+  if (!user) throw new FirestoreServiceError('User must be authenticated to update entries', 'unauthenticated');
 
   if (isFirebaseConfigured && db) {
     const entryRef = doc(db, 'users', user.uid, 'entries', entryId);
@@ -268,14 +295,17 @@ export async function getUserProfile(): Promise<UserProfile | null> {
 }
 
 /**
- * Update user profile.
- * @param data - Partial profile data to update
+ * Update user profile with partial data.
+ *
+ * @param data - Partial profile fields to update (uid is always preserved)
+ * @returns Promise that resolves when the profile is updated
+ * @throws {FirestoreServiceError} If user is not authenticated
  */
 export async function updateUserProfile(
   data: Partial<Omit<UserProfile, 'uid'>>
 ): Promise<void> {
   const user = auth.currentUser;
-  if (!user) throw new Error('User must be authenticated to update profile');
+  if (!user) throw new FirestoreServiceError('User must be authenticated to update profile', 'unauthenticated');
 
   if (isFirebaseConfigured && db) {
     const userRef = doc(db, 'users', user.uid);
