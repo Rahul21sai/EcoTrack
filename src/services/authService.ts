@@ -1,7 +1,8 @@
 /**
  * EcoTrack Authentication Service
  * Handles Firebase Auth with Google Sign-In (free tier).
- * No password storage = no password leak risk.
+ * Automatically falls back to a simulated demo-mode auth if credentials are not configured,
+ * preventing blank-screen crashes.
  */
 
 import { initializeApp } from 'firebase/app';
@@ -24,37 +25,87 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID || '',
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const googleProvider = new GoogleAuthProvider();
+export const isFirebaseConfigured = !!firebaseConfig.apiKey;
 
-/**
- * Sign in with Google popup.
- * @returns The signed-in Firebase User
- */
-export async function signIn(): Promise<User> {
-  const result = await signInWithPopup(auth, googleProvider);
-  return result.user;
+let app: any;
+let realAuth: any;
+let googleProvider: any;
+
+if (isFirebaseConfigured) {
+  try {
+    app = initializeApp(firebaseConfig);
+    realAuth = getAuth(app);
+    googleProvider = new GoogleAuthProvider();
+  } catch (err) {
+    console.error('Firebase initialization failed, falling back to demo mode:', err);
+    realAuth = null;
+  }
 }
 
-/**
- * Sign out and clear all in-memory and cached state.
- */
+// Simulated User type for Demo Mode
+export interface DemoUser {
+  uid: string;
+  displayName: string | null;
+  email: string | null;
+  photoURL: string | null;
+}
+
+// Demo mode state
+let demoUser: DemoUser | null = {
+  uid: 'demo_user',
+  displayName: 'Demo User',
+  email: 'demo@ecotrack.org',
+  photoURL: null,
+};
+
+const authListeners = new Set<(user: any) => void>();
+
+export async function signIn(): Promise<any> {
+  if (isFirebaseConfigured && realAuth) {
+    const result = await signInWithPopup(realAuth, googleProvider);
+    return result.user;
+  } else {
+    demoUser = {
+      uid: 'demo_user',
+      displayName: 'Demo User',
+      email: 'demo@ecotrack.org',
+      photoURL: null,
+    };
+    authListeners.forEach((cb) => cb(demoUser));
+    return demoUser;
+  }
+}
+
 export async function signOut(): Promise<void> {
   clearAllCache();
-  await firebaseSignOut(auth);
+  if (isFirebaseConfigured && realAuth) {
+    await firebaseSignOut(realAuth);
+  } else {
+    demoUser = null;
+    authListeners.forEach((cb) => cb(null));
+  }
 }
 
-/**
- * Subscribe to auth state changes.
- * @param callback - Called with User or null on auth state change
- * @returns Unsubscribe function
- */
 export function onAuthChange(
-  callback: (user: User | null) => void
+  callback: (user: any) => void
 ): () => void {
-  return onAuthStateChanged(auth, callback);
+  if (isFirebaseConfigured && realAuth) {
+    return onAuthStateChanged(realAuth, callback);
+  } else {
+    authListeners.add(callback);
+    // Trigger callback immediately for demo mode
+    callback(demoUser);
+    return () => {
+      authListeners.delete(callback);
+    };
+  }
 }
 
-export { auth };
+// Export a proxy auth object for standard property accesses in components/hooks
+export const auth = isFirebaseConfigured && realAuth ? realAuth : {
+  get currentUser() {
+    return demoUser;
+  }
+};
+
 export type { User };
