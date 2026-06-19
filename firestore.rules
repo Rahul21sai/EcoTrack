@@ -1,0 +1,35 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // User profile documents — only the owner can read/write their own profile
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Carbon footprint log entries — auth-scoped with data validation
+    match /users/{userId}/entries/{entryId} {
+      // Only authenticated users can read their own entries
+      allow read: if request.auth != null && request.auth.uid == userId;
+
+      // Create: authenticated + data validation (defense in depth)
+      // - value must be a non-negative number under 100,000 (prevents abuse)
+      // - category must be one of the four valid emission categories
+      allow create: if request.auth != null
+                    && request.auth.uid == userId
+                    && request.resource.data.value is number
+                    && request.resource.data.value >= 0
+                    && request.resource.data.value < 100000
+                    && request.resource.data.category in
+                       ['transport', 'energy', 'food', 'waste'];
+
+      // Update and delete: only the owner
+      allow update, delete: if request.auth != null
+                            && request.auth.uid == userId;
+    }
+
+    // Default: deny all other paths — no public read/write anywhere
+  }
+}
