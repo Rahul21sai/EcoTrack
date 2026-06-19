@@ -1,6 +1,31 @@
 # EcoTrack — Carbon Footprint Awareness Platform
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-eco--track--wihj.vercel.app-brightgreen?style=for-the-badge&logo=vercel)](https://eco-track-wihj.vercel.app)
+[![GitHub](https://img.shields.io/badge/GitHub-Rahul21sai%2FEcoTrack-181717?style=for-the-badge&logo=github)](https://github.com/Rahul21sai/EcoTrack)
+[![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react)](https://react.dev/)
+[![Firebase](https://img.shields.io/badge/Firebase-Auth%20%2B%20Firestore-FFCA28?style=for-the-badge&logo=firebase)](https://firebase.google.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Strict-3178C6?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
+
 EcoTrack is a production-ready, highly secure, and highly efficient Carbon Footprint Awareness Platform built for the Google PromptWars hackathon. The platform helps individuals understand, track, and reduce their carbon footprint through simple actions and personalized, rule-based insights.
+
+🌐 **Live App**: [https://eco-track-wihj.vercel.app](https://eco-track-wihj.vercel.app)
+📦 **Repository**: [https://github.com/Rahul21sai/EcoTrack](https://github.com/Rahul21sai/EcoTrack)
+
+---
+
+## 🖥️ Tech Stack
+
+| Layer | Technology |
+|---|---|
+| **Frontend Framework** | React 19 + TypeScript (Strict Mode) |
+| **Build Tool** | Vite 8 |
+| **Styling** | Tailwind CSS v4 + Custom CSS Variables |
+| **Charts** | Recharts |
+| **Authentication** | Firebase Auth (Google Sign-In) |
+| **Database** | Firebase Firestore |
+| **Testing** | Vitest + React Testing Library (81 tests) |
+| **Deployment** | Vercel (CI/CD from GitHub) |
+| **Icons** | Lucide React |
 
 ---
 
