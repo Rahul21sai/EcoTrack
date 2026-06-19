@@ -23,7 +23,7 @@ EcoTrack is a production-ready, highly secure, and highly efficient Carbon Footp
 | **Charts** | Recharts |
 | **Authentication** | Firebase Auth (Google Sign-In) |
 | **Database** | Firebase Firestore |
-| **Testing** | Vitest + React Testing Library (81 tests) |
+| **Testing** | Vitest + React Testing Library (98 tests) |
 | **Deployment** | Vercel (CI/CD from GitHub) |
 | **Icons** | Lucide React |
 
@@ -33,9 +33,10 @@ EcoTrack is a production-ready, highly secure, and highly efficient Carbon Footp
 * **Problem Statement**: Design a solution that helps individuals understand, track, and reduce their carbon footprint through simple actions and personalized insights.
 * **Vertical**: Sustainability & Climate Action.
 * **Core Principles**:
-  * **Understand**: Explain *why* actions have carbon impacts, rather than just displaying arbitrary numbers.
-  * **Track**: Support daily and weekly logging across Transport, Energy, Food, and Waste categories.
-  * **Reduce**: Provide actionable, personalized, and achievable suggestions based on actual logged user behavior.
+  * **Understand**: Explain *why* actions have carbon impacts through relatable comparisons (e.g., "≈ driving 100 km in a petrol car") rather than displaying abstract kg numbers.
+  * **Track**: Support daily and weekly logging across Transport, Energy, Food, and Waste categories, with category-filter pills in the History Log.
+  * **Reduce**: Provide actionable, personalized, and achievable suggestions based on actual logged user behavior. Recommendations include a **'Mark as tried' button** (persisted to localStorage) to let users track what they've acted on.
+  * **Personalized Insights**: A **Weekly Insight Summary** displayed prominently on the Dashboard compares this week's emissions to last week, identifies the biggest change by category, and generates a one-sentence actionable tip.
 
 ---
 
@@ -44,8 +45,11 @@ EcoTrack operates as a closed-loop system of tracking, analysis, and feedback:
 1. **User Action Logging**: The user inputs daily activities (e.g., traveling 10 km by petrol car, eating a vegetarian meal) through a highly accessible and sanitized form.
 2. **Carbon Calculation**: Activities are processed by a pure-function calculation engine (`carbonEngine.ts`) mapping inputs to validated, cited emission factors.
 3. **Categorization & Aggregation**: Daily, weekly, and monthly totals are aggregated and compared against national baseline averages.
-4. **Rule-Based Recommendations**: A deterministic, rule-based recommendation engine analyzes logged behavior and produces ranked, context-specific tips with computed reduction potentials.
-5. **Streak & Savings Tracking**: The platform tracks consecutive logging days and calculated savings to reinforce positive habits.
+3. **Categorization & Aggregation**: Daily, weekly, and monthly totals are aggregated and compared against national baseline averages.
+4. **Rule-Based Recommendations**: A deterministic, rule-based recommendation engine analyzes logged behavior and produces ranked, context-specific tips with computed reduction potentials. Users can **Mark as tried** to adaptively deprioritize acted-on recommendations.
+5. **Personalized Weekly Insights**: The `generateWeeklyInsight()` pure function compares current vs. prior-week emissions by category, producing a single actionable sentence surfaced in the **Weekly Insight Summary** dashboard card.
+6. **Relatable Comparisons**: The `generateRelatableComparison()` function maps abstract kg CO2e values to real-world reference points (phone charges, car trips, flights, tree absorption).
+7. **Streak & Savings Tracking**: The platform tracks consecutive logging days and calculated savings to reinforce positive habits.
 
 ---
 
