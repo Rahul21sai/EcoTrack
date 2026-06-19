@@ -288,8 +288,9 @@ describe('Recommendation Engine', () => {
     ];
     const recs = generateRecommendations(entries, []);
     for (let i = 0; i < recs.length - 1; i++) {
-      expect(recs[i].estimatedSavingsKg).toBeGreaterThanOrEqual(
-        recs[i + 1].estimatedSavingsKg
+      // Non-null assertions safe: loop bounds guarantee these indices are in range
+      expect(recs[i]!.estimatedSavingsKg).toBeGreaterThanOrEqual(
+        recs[i + 1]!.estimatedSavingsKg
       );
     }
   });

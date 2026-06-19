@@ -26,6 +26,7 @@ import {
   compareToNationalAverage,
 } from './utils/carbonEngine';
 import type { TrendDataPoint } from './types';
+import WeeklyInsightSummary from './components/WeeklyInsightSummary';
 
 // Lazy load HistoryLog — only loads when "History" tab is clicked
 const HistoryLog = lazy(() => import('./components/HistoryLog'));
@@ -85,6 +86,25 @@ function AppContent() {
     const todayTotal = calculateDailyTotal(todayEntries);
     return compareToNationalAverage(todayTotal, 'Global');
   }, [entries, today]);
+
+  // Split entries into this-week vs last-week for WeeklyInsightSummary
+  const { thisWeekEntries, lastWeekEntries } = useMemo(() => {
+    const now = new Date();
+    const weekAgo = new Date(now);
+    weekAgo.setDate(now.getDate() - 7);
+    const twoWeeksAgo = new Date(now);
+    twoWeeksAgo.setDate(now.getDate() - 14);
+
+    const thisWeekStr = weekAgo.toISOString().split('T')[0]!;
+    const twoWeeksStr = twoWeeksAgo.toISOString().split('T')[0]!;
+
+    return {
+      thisWeekEntries: entries.filter((e) => e.date != null && e.date >= thisWeekStr),
+      lastWeekEntries: entries.filter(
+        (e) => e.date != null && e.date >= twoWeeksStr && e.date < thisWeekStr
+      ),
+    };
+  }, [entries]);
 
   const handleAddEntry = useCallback(
     async (entry: Omit<LogEntry, 'id' | 'userId' | 'createdAt'>): Promise<void> => {
@@ -173,6 +193,10 @@ function AppContent() {
         {/* Dashboard tab */}
         {activeTab === 'dashboard' && (
           <div className="space-y-8">
+            <WeeklyInsightSummary
+              entries={thisWeekEntries}
+              history={lastWeekEntries}
+            />
             <DashboardSummary entries={entries} />
             <div className="grid grid-cols-1 min-[900px]:grid-cols-[2fr_3fr] gap-8">
               <CategoryBreakdownChart data={breakdown} onNavigateToLog={() => setActiveTab('log')} />
