@@ -62,7 +62,7 @@ function CategoryBreakdownChartInner({ data, onNavigateToLog }: CategoryBreakdow
               paddingAngle={chartData.length > 1 ? 3 : 0}
               dataKey="value"
               stroke="none"
-              label={({ cx, cy, midAngle, outerRadius, percent, name }) => {
+              label={({ cx = 0, cy = 0, midAngle = 0, outerRadius = 0, percent = 0, name = '' }) => {
                 const RADIAN = Math.PI / 180;
                 const radius = outerRadius + 14;
                 const x = cx + radius * Math.cos(-midAngle * RADIAN);
