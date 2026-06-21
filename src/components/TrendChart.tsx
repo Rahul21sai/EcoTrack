@@ -12,27 +12,17 @@ import {
 import { TrendingUp as TrendingIcon } from 'lucide-react';
 import type { TrendDataPoint } from '../types';
 import { formatCarbonValue } from '../utils/carbonEngine';
-import { useEntries } from '../hooks/useEntries';
-import { CATEGORIES } from '../utils/constants';
 
 interface TrendChartProps {
   data: TrendDataPoint[];
   onNavigateToLog?: () => void;
+  singlePointColor?: string;
 }
 
-function TrendChartInner({ data, onNavigateToLog }: TrendChartProps) {
-  const { entries } = useEntries();
+function TrendChartInner({ data, onNavigateToLog, singlePointColor }: TrendChartProps) {
   const isSparse = data.length < 3;
 
-  const getSinglePointColor = () => {
-    if (entries.length === 0) return '#3DDC97';
-    const singleDate = data[0]?.date;
-    const dayEntries = entries.filter((e) => e.date === singleDate);
-    if (dayEntries.length === 0) return '#3DDC97';
-    const primaryCatId = dayEntries[0]?.category;
-    const catMeta = CATEGORIES.find((c) => c.id === primaryCatId);
-    return catMeta ? catMeta.color : '#3DDC97';
-  };
+  const getSinglePointColor = () => singlePointColor ?? '#3DDC97';
 
   if (data.length === 0) {
     return (

@@ -25,7 +25,7 @@ import {
   calculateDailyTotal,
   compareToNationalAverage,
 } from './utils/carbonEngine';
-import { TREND_DAYS_LIMIT } from './utils/constants';
+import { CATEGORIES, TREND_DAYS_LIMIT } from './utils/constants';
 import type { TrendDataPoint } from './types';
 import WeeklyInsightSummary from './components/WeeklyInsightSummary';
 
@@ -80,6 +80,18 @@ function AppContent() {
       .sort((a, b) => a.date.localeCompare(b.date))
       .slice(-TREND_DAYS_LIMIT); // Last N days
   }, [entries]);
+
+  const trendSinglePointColor = useMemo(() => {
+    if (trendData.length !== 1) {
+      return undefined;
+    }
+
+    const singleDate = trendData[0]?.date;
+    const firstEntryForDate = entries.find((entry) => entry.date === singleDate);
+    const categoryMeta = CATEGORIES.find((cat) => cat.id === firstEntryForDate?.category);
+
+    return categoryMeta?.color;
+  }, [entries, trendData]);
 
   // Comparison to national average
   const comparison = useMemo(() => {
@@ -206,7 +218,11 @@ function AppContent() {
                 <ComparisonCard comparison={comparison} />
               </div>
             </div>
-            <TrendChart data={trendData} onNavigateToLog={() => setActiveTab('log')} />
+            <TrendChart
+              data={trendData}
+              onNavigateToLog={() => setActiveTab('log')}
+              singlePointColor={trendSinglePointColor}
+            />
           </div>
         )}
 

@@ -106,7 +106,7 @@ EcoTrack adopts a **Defense-in-Depth** security architecture:
 ## 🧪 Testing
 This project uses **Vitest** and **React Testing Library** — the TypeScript/React ecosystem equivalent of JUnit.
 
-### Test Coverage (81 tests, 100% passing):
+### Test Coverage (98 tests, 100% passing):
 * **`carbonEngine.test.ts` (64 tests)**: Validates all 17 pure functions including:
   * Calculations (under normal, edge, and throwing/negative value conditions).
   * Streak calculation logic (consecutive dates, gaps, empty arrays).
@@ -116,6 +116,9 @@ This project uses **Vitest** and **React Testing Library** — the TypeScript/Re
   * AuthGate loading, sign-in, and child rendering states.
   * Streak milestones (e.g., 7+ day milestone badge).
   * Recharts visual breakdown fallbacks.
+* **`insights.test.ts` (17 tests)**: Validates personalized weekly insights and relatable CO2e comparisons:
+  * Insufficient-data, improvement, regression, and steady-state cases.
+  * Phone-charge, kettle, burger, driving, flight, and tree-absorption comparisons.
 
 Run the test suite:
 ```bash
