@@ -37,15 +37,22 @@ const db = isFirebaseConfigured ? getFirestore() : null;
 const getLocalEntriesKey = (uid: string) => `ecotrack_local_entries_${uid}`;
 const getLocalProfileKey = (uid: string) => `ecotrack_local_profile_${uid}`;
 
-// Simulated QueryDocumentSnapshot for local storage pagination compatibility
+/**
+ * Mock Firestore document snapshot used for LocalStorage pagination compatibility.
+ * Mimics the QueryDocumentSnapshot interface with just enough to support cursor-based pagination.
+ */
 class MockQueryDocumentSnapshot {
-  id: string;
-  private _data: LogEntry;
+  /** Document ID */
+  readonly id: string;
+  private readonly _data: LogEntry;
+
   constructor(id: string, data: LogEntry) {
     this.id = id;
     this._data = data;
   }
-  data() {
+
+  /** Returns the document data as a LogEntry */
+  data(): LogEntry {
     return this._data;
   }
 }
@@ -66,31 +73,39 @@ export async function saveEntry(entry: Omit<LogEntry, 'id' | 'userId' | 'created
   const user = auth.currentUser;
   if (!user) throw new FirestoreServiceError('User must be authenticated to save entries', 'unauthenticated');
 
-  if (isFirebaseConfigured && db) {
-    const entriesRef = collection(db, 'users', user.uid, 'entries');
-    const docRef = await addDoc(entriesRef, {
-      ...entry,
-      userId: user.uid,
-      createdAt: serverTimestamp(),
-    });
-    return docRef.id;
-  } else {
-    // LocalStorage Fallback
-    const localKey = getLocalEntriesKey(user.uid);
-    const existingStr = localStorage.getItem(localKey);
-    const existing: LogEntry[] = existingStr ? JSON.parse(existingStr) : [];
-    
-    const newId = `local_entry_${Date.now()}`;
-    const newEntry: LogEntry = {
-      ...entry,
-      id: newId,
-      userId: user.uid,
-      createdAt: new Date().toISOString(),
-    };
-    
-    existing.unshift(newEntry);
-    localStorage.setItem(localKey, JSON.stringify(existing));
-    return newId;
+  try {
+    if (isFirebaseConfigured && db) {
+      const entriesRef = collection(db, 'users', user.uid, 'entries');
+      const docRef = await addDoc(entriesRef, {
+        ...entry,
+        userId: user.uid,
+        createdAt: serverTimestamp(),
+      });
+      return docRef.id;
+    } else {
+      // LocalStorage Fallback
+      const localKey = getLocalEntriesKey(user.uid);
+      const existingStr = localStorage.getItem(localKey);
+      const existing: LogEntry[] = existingStr ? (JSON.parse(existingStr) as LogEntry[]) : [];
+
+      const newId = `local_entry_${Date.now()}`;
+      const newEntry: LogEntry = {
+        ...entry,
+        id: newId,
+        userId: user.uid,
+        createdAt: new Date().toISOString(),
+      };
+
+      existing.unshift(newEntry);
+      localStorage.setItem(localKey, JSON.stringify(existing));
+      return newId;
+    }
+  } catch (error) {
+    if (error instanceof FirestoreServiceError) throw error;
+    throw new FirestoreServiceError(
+      `Failed to save entry: ${error instanceof Error ? error.message : 'unknown error'}`,
+      'write-failed'
+    );
   }
 }
 
@@ -111,69 +126,77 @@ export async function getEntries(
   const user = auth.currentUser;
   if (!user) throw new FirestoreServiceError('User must be authenticated to read entries', 'unauthenticated');
 
-  if (isFirebaseConfigured && db) {
-    const entriesRef = collection(db, 'users', user.uid, 'entries');
-    let q = query(
-      entriesRef,
-      where('userId', '==', user.uid),
-      orderBy('createdAt', 'desc'),
-      limit(ENTRIES_PER_PAGE)
-    );
-
-    if (lastDoc) {
-      q = query(
+  try {
+    if (isFirebaseConfigured && db) {
+      const entriesRef = collection(db, 'users', user.uid, 'entries');
+      let q = query(
         entriesRef,
         where('userId', '==', user.uid),
         orderBy('createdAt', 'desc'),
-        startAfter(lastDoc),
         limit(ENTRIES_PER_PAGE)
       );
-    }
 
-    const snapshot = await getDocs(q);
-    const entries: LogEntry[] = snapshot.docs.map((docSnap) => ({
-      id: docSnap.id,
-      ...docSnap.data(),
-    })) as LogEntry[];
+      if (lastDoc) {
+        q = query(
+          entriesRef,
+          where('userId', '==', user.uid),
+          orderBy('createdAt', 'desc'),
+          startAfter(lastDoc),
+          limit(ENTRIES_PER_PAGE)
+        );
+      }
 
-    // Non-null assertion safe: we check length > 0 before accessing the last element
-    const lastDocument =
-      snapshot.docs.length > 0
-        ? snapshot.docs[snapshot.docs.length - 1]!
+      const snapshot = await getDocs(q);
+      const entries: LogEntry[] = snapshot.docs.map((docSnap) => ({
+        id: docSnap.id,
+        ...docSnap.data(),
+      })) as LogEntry[];
+
+      // Non-null assertion safe: we check length > 0 before accessing the last element
+      const lastDocument =
+        snapshot.docs.length > 0
+          ? snapshot.docs[snapshot.docs.length - 1]!
+          : null;
+
+      return { entries, lastDocument };
+    } else {
+      // LocalStorage Fallback
+      const localKey = getLocalEntriesKey(user.uid);
+      const existingStr = localStorage.getItem(localKey);
+      const existing: LogEntry[] = existingStr ? (JSON.parse(existingStr) as LogEntry[]) : [];
+
+      // Sort descending by date/createdAt
+      existing.sort((a, b) => {
+        const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return bTime - aTime;
+      });
+
+      let paginated = existing;
+
+      if (lastDoc) {
+        const lastId = lastDoc.id;
+        const lastIndex = existing.findIndex((e) => e.id === lastId);
+        if (lastIndex !== -1) {
+          paginated = existing.slice(lastIndex + 1);
+        }
+      }
+
+      const pageSlice = paginated.slice(0, ENTRIES_PER_PAGE);
+
+      const lastEntry = pageSlice.length > 0 ? pageSlice[pageSlice.length - 1] : null;
+      const lastDocument = lastEntry
+        ? new MockQueryDocumentSnapshot(lastEntry.id!, lastEntry) as unknown as QueryDocumentSnapshot
         : null;
 
-    return { entries, lastDocument };
-  } else {
-    // LocalStorage Fallback
-    const localKey = getLocalEntriesKey(user.uid);
-    const existingStr = localStorage.getItem(localKey);
-    const existing: LogEntry[] = existingStr ? JSON.parse(existingStr) : [];
-    
-    // Sort descending by date/createdAt
-    existing.sort((a, b) => {
-      const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-      const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-      return bTime - aTime;
-    });
-
-    let paginated = existing;
-
-    if (lastDoc) {
-      const lastId = lastDoc.id;
-      const lastIndex = existing.findIndex((e) => e.id === lastId);
-      if (lastIndex !== -1) {
-        paginated = existing.slice(lastIndex + 1);
-      }
+      return { entries: pageSlice, lastDocument };
     }
-
-    const pageSlice = paginated.slice(0, ENTRIES_PER_PAGE);
-    
-    const lastEntry = pageSlice.length > 0 ? pageSlice[pageSlice.length - 1] : null;
-    const lastDocument = lastEntry 
-      ? new MockQueryDocumentSnapshot(lastEntry.id!, lastEntry) as unknown as QueryDocumentSnapshot
-      : null;
-
-    return { entries: pageSlice, lastDocument };
+  } catch (error) {
+    if (error instanceof FirestoreServiceError) throw error;
+    throw new FirestoreServiceError(
+      `Failed to fetch entries: ${error instanceof Error ? error.message : 'unknown error'}`,
+      'read-failed'
+    );
   }
 }
 
@@ -192,18 +215,26 @@ export async function deleteEntry(entryId: string): Promise<void> {
   const user = auth.currentUser;
   if (!user) throw new FirestoreServiceError('User must be authenticated to delete entries', 'unauthenticated');
 
-  if (isFirebaseConfigured && db) {
-    const entryRef = doc(db, 'users', user.uid, 'entries', entryId);
-    await deleteDoc(entryRef);
-  } else {
-    // LocalStorage Fallback
-    const localKey = getLocalEntriesKey(user.uid);
-    const existingStr = localStorage.getItem(localKey);
-    if (existingStr) {
-      const existing: LogEntry[] = JSON.parse(existingStr);
-      const filtered = existing.filter((e) => e.id !== entryId);
-      localStorage.setItem(localKey, JSON.stringify(filtered));
+  try {
+    if (isFirebaseConfigured && db) {
+      const entryRef = doc(db, 'users', user.uid, 'entries', entryId);
+      await deleteDoc(entryRef);
+    } else {
+      // LocalStorage Fallback
+      const localKey = getLocalEntriesKey(user.uid);
+      const existingStr = localStorage.getItem(localKey);
+      if (existingStr) {
+        const existing: LogEntry[] = JSON.parse(existingStr) as LogEntry[];
+        const filtered = existing.filter((e) => e.id !== entryId);
+        localStorage.setItem(localKey, JSON.stringify(filtered));
+      }
     }
+  } catch (error) {
+    if (error instanceof FirestoreServiceError) throw error;
+    throw new FirestoreServiceError(
+      `Failed to delete entry: ${error instanceof Error ? error.message : 'unknown error'}`,
+      'delete-failed'
+    );
   }
 }
 
@@ -226,23 +257,31 @@ export async function updateEntry(
   const user = auth.currentUser;
   if (!user) throw new FirestoreServiceError('User must be authenticated to update entries', 'unauthenticated');
 
-  if (isFirebaseConfigured && db) {
-    const entryRef = doc(db, 'users', user.uid, 'entries', entryId);
-    await updateDoc(entryRef, data);
-  } else {
-    // LocalStorage Fallback
-    const localKey = getLocalEntriesKey(user.uid);
-    const existingStr = localStorage.getItem(localKey);
-    if (existingStr) {
-      const existing: LogEntry[] = JSON.parse(existingStr);
-      const updated = existing.map((e) => {
-        if (e.id === entryId) {
-          return { ...e, ...data };
-        }
-        return e;
-      });
-      localStorage.setItem(localKey, JSON.stringify(updated));
+  try {
+    if (isFirebaseConfigured && db) {
+      const entryRef = doc(db, 'users', user.uid, 'entries', entryId);
+      await updateDoc(entryRef, data);
+    } else {
+      // LocalStorage Fallback
+      const localKey = getLocalEntriesKey(user.uid);
+      const existingStr = localStorage.getItem(localKey);
+      if (existingStr) {
+        const existing: LogEntry[] = JSON.parse(existingStr) as LogEntry[];
+        const updated = existing.map((e) => {
+          if (e.id === entryId) {
+            return { ...e, ...data };
+          }
+          return e;
+        });
+        localStorage.setItem(localKey, JSON.stringify(updated));
+      }
     }
+  } catch (error) {
+    if (error instanceof FirestoreServiceError) throw error;
+    throw new FirestoreServiceError(
+      `Failed to update entry: ${error instanceof Error ? error.message : 'unknown error'}`,
+      'update-failed'
+    );
   }
 }
 

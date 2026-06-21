@@ -12,9 +12,9 @@
  */
 import { useState, useCallback } from 'react';
 import type { ReactElement } from 'react';
-import type { Recommendation } from '../types';
-import type { EmissionCategory } from '../types';
-import { Car, Zap, Utensils, Trash2, Leaf, Lightbulb, CheckCircle2 } from 'lucide-react';
+import type { Recommendation, DifficultyLevel } from '../types';
+import { Leaf, CheckCircle2 } from 'lucide-react';
+import { getCategoryIcon } from '../utils/categoryIcons';
 
 /** Props for the RecommendationCard component */
 interface RecommendationCardProps {
@@ -22,8 +22,8 @@ interface RecommendationCardProps {
   recommendation: Recommendation;
 }
 
-/** Difficulty badge styling configuration keyed by DifficultyLevel */
-const DIFFICULTY_CONFIG: Record<string, { color: string; bg: string; border: string }> = {
+/** Difficulty badge styling configuration keyed by {@link DifficultyLevel} */
+const DIFFICULTY_CONFIG: Record<DifficultyLevel, { color: string; bg: string; border: string }> = {
   easy: {
     color: 'text-[#3DDC97]',
     bg: 'bg-[#3DDC97]/10',
@@ -52,27 +52,6 @@ function getTriedKey(title: string): string {
 }
 
 /**
- * Returns the appropriate icon for a given emission category.
- *
- * @param category - The emission category to get an icon for
- * @returns A themed icon element, or a default lightbulb for unknown categories
- */
-function getCategoryIcon(category: EmissionCategory | string): ReactElement {
-  switch (category) {
-    case 'transport':
-      return <Car className="w-4 h-4 text-[#3D8BFF]" />;
-    case 'energy':
-      return <Zap className="w-4 h-4 text-[#E8B84B]" />;
-    case 'food':
-      return <Utensils className="w-4 h-4 text-[#3DDC97]" />;
-    case 'waste':
-      return <Trash2 className="w-4 h-4 text-[#8FA098]" />;
-    default:
-      return <Lightbulb className="w-4 h-4 text-[#3DDC97]" />;
-  }
-}
-
-/**
  * Renders a single personalized recommendation card with a "Mark as tried" button.
  */
 export default function RecommendationCard({ recommendation }: RecommendationCardProps): ReactElement {
@@ -91,7 +70,7 @@ export default function RecommendationCard({ recommendation }: RecommendationCar
     }
   }, [tried, triedKey]);
 
-  const difficulty = DIFFICULTY_CONFIG[recommendation.difficulty] ?? DIFFICULTY_CONFIG['easy']!;
+  const difficulty = DIFFICULTY_CONFIG[recommendation.difficulty];
 
   return (
     <div

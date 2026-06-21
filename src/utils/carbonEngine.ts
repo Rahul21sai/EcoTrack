@@ -40,6 +40,13 @@ import {
   CAR_USAGE_THRESHOLD,
   MEAT_HEAVY_THRESHOLD,
   DEFAULT_COUNTRY,
+  COMPARISON_THRESHOLD_PERCENT,
+  ENERGY_RECOVERY_FACTOR,
+  WASTE_DIVERSION_FACTOR,
+  SHORT_TRIP_KM_MAX,
+  VEGAN_SUGGESTION_THRESHOLD,
+  MAX_INPUT_VALUE,
+  RECOMMENDED_SWAPS,
 } from './constants';
 
 // ── Transport ────────────────────────────────────────────────────────────────
@@ -244,9 +251,9 @@ export function compareToNationalAverage(
     nationalAverage > 0 ? (difference / nationalAverage) * 100 : 0;
 
   let status: 'above' | 'below' | 'average';
-  if (difference > nationalAverage * 0.05) {
+  if (difference > nationalAverage * COMPARISON_THRESHOLD_PERCENT) {
     status = 'above';
-  } else if (difference < -nationalAverage * 0.05) {
+  } else if (difference < -nationalAverage * COMPARISON_THRESHOLD_PERCENT) {
     status = 'below';
   } else {
     status = 'average';
@@ -294,8 +301,8 @@ export function validateLogEntry(entry: LogEntry): ValidationResult {
     errors.push('Value must be a valid number');
   } else if (entry.value < 0) {
     errors.push('Value must be non-negative');
-  } else if (entry.value >= 100000) {
-    errors.push('Value must be less than 100,000');
+  } else if (entry.value >= MAX_INPUT_VALUE) {
+    errors.push(`Value must be less than ${MAX_INPUT_VALUE.toLocaleString()}`);
   }
 
   // Unit is required
@@ -418,7 +425,7 @@ export function generateRecommendations(
     );
     const busEmissionPerTrip = calculateTransportEmission('bus', avgCarKm);
     const savingsPerTrip = carEmissionPerTrip - busEmissionPerTrip;
-    const estimatedSavingsKg = savingsPerTrip * 2; // Suggest swapping 2 trips
+    const estimatedSavingsKg = savingsPerTrip * RECOMMENDED_SWAPS;
 
     recommendations.push({
       title: 'Try public transport twice this week',
@@ -442,7 +449,7 @@ export function generateRecommendations(
     const savingsPerSwap =
       calculateFoodEmission('meat_heavy', 1) -
       calculateFoodEmission('vegetarian', 1);
-    const estimatedSavingsKg = savingsPerSwap * 2; // Swap 2 meals
+    const estimatedSavingsKg = savingsPerSwap * RECOMMENDED_SWAPS;
 
     recommendations.push({
       title: 'Swap 2 meat meals for vegetarian this week',
@@ -467,7 +474,7 @@ export function generateRecommendations(
       recommendations.push({
         title: 'Check for always-on devices',
         description: `Your electricity use rose ${increase.toFixed(1)} kg CO2e vs last period. Common culprits: space heaters left on, old refrigerators, standby electronics. Unplugging idle devices can cut standby power by 5-10%.`,
-        estimatedSavingsKg: increase * 0.3, // Estimate 30% recoverable
+        estimatedSavingsKg: increase * ENERGY_RECOVERY_FACTOR,
         difficulty: 'easy',
         category: 'energy',
       });
@@ -485,7 +492,7 @@ export function generateRecommendations(
   const totalRecycled = recycledEntries.reduce((sum, e) => sum + e.value, 0);
 
   if (totalLandfill > totalRecycled && totalLandfill > 0) {
-    const potentialDivertKg = totalLandfill * 0.5; // Divert half
+    const potentialDivertKg = totalLandfill * WASTE_DIVERSION_FACTOR;
     const savingsPerKg =
       calculateWasteEmission('landfill', 1) -
       calculateWasteEmission('recycled', 1);
@@ -501,14 +508,14 @@ export function generateRecommendations(
   }
 
   // ── Rule 5: General transport — consider cycling/walking for short trips ──
-  const shortCarTrips = carEntries.filter((e) => e.value <= 5); // ≤ 5km
+  const shortCarTrips = carEntries.filter((e) => e.value <= SHORT_TRIP_KM_MAX);
   if (shortCarTrips.length >= 2) {
     const totalShortKm = shortCarTrips.reduce((sum, e) => sum + e.value, 0);
     const estimatedSavingsKg = calculateTransportEmission('car_petrol', totalShortKm);
 
     recommendations.push({
       title: 'Walk or cycle for short trips',
-      description: `You made ${shortCarTrips.length} car trips under 5km. Walking or cycling these ${totalShortKm.toFixed(1)}km would eliminate ${estimatedSavingsKg.toFixed(1)} kg CO2e entirely — plus you'd get health benefits!`,
+      description: `You made ${shortCarTrips.length} car trips under ${SHORT_TRIP_KM_MAX}km. Walking or cycling these ${totalShortKm.toFixed(1)}km would eliminate ${estimatedSavingsKg.toFixed(1)} kg CO2e entirely — plus you'd get health benefits!`,
       estimatedSavingsKg,
       difficulty: 'moderate',
       category: 'transport',
@@ -523,11 +530,11 @@ export function generateRecommendations(
     (sum, e) => sum + e.value,
     0
   );
-  if (totalMeatLightMeals >= 3 && totalMeatHeavyMeals < MEAT_HEAVY_THRESHOLD) {
+  if (totalMeatLightMeals >= VEGAN_SUGGESTION_THRESHOLD && totalMeatHeavyMeals < MEAT_HEAVY_THRESHOLD) {
     const savingsPerSwap =
       calculateFoodEmission('meat_light', 1) -
       calculateFoodEmission('vegan', 1);
-    const estimatedSavingsKg = savingsPerSwap * 2;
+    const estimatedSavingsKg = savingsPerSwap * RECOMMENDED_SWAPS;
 
     recommendations.push({
       title: 'Try a couple of vegan meals this week',

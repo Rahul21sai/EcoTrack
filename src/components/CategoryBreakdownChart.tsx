@@ -5,11 +5,24 @@ import type { CategoryBreakdown } from '../types';
 import { CATEGORIES } from '../utils/constants';
 import { formatCarbonValue } from '../utils/carbonEngine';
 
+/** Props for the {@link CategoryBreakdownChart} component */
 interface CategoryBreakdownChartProps {
+  /** Category emission breakdown data to visualize */
   data: CategoryBreakdown;
+  /** Optional callback to navigate to the Log Entry tab */
   onNavigateToLog?: () => void;
 }
 
+/**
+ * Renders a donut chart showing the user's carbon emissions broken down
+ * by category (Transport, Energy, Food, Waste). Shows an empty state
+ * with a prompt when no data is available.
+ *
+ * Wrapped in React.memo to prevent unnecessary re-renders when parent state changes.
+ *
+ * @param props - Component props with breakdown data and optional navigation callback
+ * @returns Donut chart card or empty state placeholder
+ */
 function CategoryBreakdownChartInner({ data, onNavigateToLog }: CategoryBreakdownChartProps) {
   const chartData = CATEGORIES.map((cat) => ({
     name: cat.label,

@@ -1,7 +1,10 @@
 import { Flame } from 'lucide-react';
 
+/** Props for the {@link StreakBadge} component */
 interface StreakBadgeProps {
+  /** Number of consecutive days the user has logged entries */
   streak: number;
+  /** Optional callback to navigate to the Log Entry tab */
   onNavigateToLog?: () => void;
 }
 
@@ -9,6 +12,9 @@ interface StreakBadgeProps {
  * Displays the user's current consecutive-day logging streak.
  * Shows a prompt to start logging when streak is zero,
  * and a congratulatory message when streak reaches 7+ days.
+ *
+ * @param props - Component props with streak count and optional navigation callback
+ * @returns Streak badge card with flame icon and motivational text
  */
 export default function StreakBadge({ streak, onNavigateToLog }: StreakBadgeProps) {
   if (streak === 0) {

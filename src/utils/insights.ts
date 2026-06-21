@@ -15,6 +15,11 @@
 
 import type { LogEntry } from '../types';
 import { getCategoryBreakdown, calculateDailyTotal } from './carbonEngine';
+import {
+  TRANSPORT_EMISSION_FACTORS,
+  WEEKLY_INSIGHT_MINIMUM_ENTRIES,
+  STEADY_STATE_THRESHOLD_PERCENT,
+} from './constants';
 
 // ── Relatable Comparisons ─────────────────────────────────────────────────────
 
@@ -81,7 +86,7 @@ export function generateRelatableComparison(kg: number): string {
 
   // Medium: car driving in km (8\u201350 kg)
   if (kg < 50) {
-    const km = Math.round(kg / 0.192);
+    const km = Math.round(kg / TRANSPORT_EMISSION_FACTORS.car_petrol);
     return `\u2248 driving ${km} km in a petrol car`;
   }
 
@@ -138,12 +143,10 @@ export function generateWeeklyInsight(
   current: LogEntry[],
   history: LogEntry[]
 ): WeeklyInsightResult {
-  const MINIMUM_ENTRIES = 3;
-
-  if (current.length < MINIMUM_ENTRIES) {
+  if (current.length < WEEKLY_INSIGHT_MINIMUM_ENTRIES) {
     return {
       hasSufficientData: false,
-      insight: `Log at least ${MINIMUM_ENTRIES} activities this week to unlock your personalized weekly insight.`,
+      insight: `Log at least ${WEEKLY_INSIGHT_MINIMUM_ENTRIES} activities this week to unlock your personalized weekly insight.`,
       primaryCategory: null,
       percentageChange: null,
     };
@@ -206,7 +209,7 @@ export function generateWeeklyInsight(
   // Generate the insight sentence
   let insight: string;
 
-  if (Math.abs(totalChange) < 2) {
+  if (Math.abs(totalChange) < STEADY_STATE_THRESHOLD_PERCENT) {
     // No significant change
     insight = `Your emissions stayed steady this week (${Math.abs(totalChange).toFixed(0)}% change). ${catLabel} remains your top category \u2014 small consistent actions compound over time.`;
   } else if (totalChange < 0) {

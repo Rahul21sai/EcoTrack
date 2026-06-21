@@ -12,6 +12,7 @@ import {
   WASTE_TYPE_LABELS,
   SUBMIT_COOLDOWN_MS,
   MAX_ENTRIES_PER_DAY,
+  MAX_INPUT_VALUE,
 } from '../utils/constants';
 
 interface LogEntryFormProps {
@@ -80,8 +81,8 @@ export default function LogEntryForm({ onSubmit, todayEntryCount = 0 }: LogEntry
         setValueWarning('Invalid value — please enter a valid positive number');
       } else if (sanitized < 0) {
         setValueWarning('Value must be a positive number');
-      } else if (sanitized >= 100000) {
-        setValueWarning('Value is unusually high. Maximum allowed is 100,000');
+      } else if (sanitized >= MAX_INPUT_VALUE) {
+        setValueWarning(`Value is unusually high. Maximum allowed is ${MAX_INPUT_VALUE.toLocaleString()}`);
       } else {
         setValueWarning(null);
       }

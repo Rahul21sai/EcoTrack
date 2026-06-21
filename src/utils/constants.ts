@@ -266,3 +266,35 @@ export const MEAT_HEAVY_THRESHOLD = 5;
 
 /** Streak length required to trigger congratulation */
 export const STREAK_CONGRATULATION_THRESHOLD = 7;
+
+// ── Comparison / Engine Thresholds ───────────────────────────────────────────
+
+/** ±5 % dead-band around national average before labelling "above"/"below" */
+export const COMPARISON_THRESHOLD_PERCENT = 0.05;
+
+/** Estimated recoverable fraction of an energy increase (30 %) */
+export const ENERGY_RECOVERY_FACTOR = 0.3;
+
+/** Fraction of landfill waste assumed divertible to recycling (50 %) */
+export const WASTE_DIVERSION_FACTOR = 0.5;
+
+/** Maximum distance (km) for a trip to be classified as "short" */
+export const SHORT_TRIP_KM_MAX = 5;
+
+/** Minimum light-meat meals to trigger "try vegan" recommendation */
+export const VEGAN_SUGGESTION_THRESHOLD = 3;
+
+/** Upper bound for any single numeric input value */
+export const MAX_INPUT_VALUE = 100_000;
+
+/** Number of days shown in the trend chart */
+export const TREND_DAYS_LIMIT = 14;
+
+/** Minimum entries for a meaningful weekly insight */
+export const WEEKLY_INSIGHT_MINIMUM_ENTRIES = 3;
+
+/** Percentage change below which emissions are considered "steady" */
+export const STEADY_STATE_THRESHOLD_PERCENT = 2;
+
+/** Number of swap recommendations (trips/meals) to suggest per rule */
+export const RECOMMENDED_SWAPS = 2;

@@ -6,7 +6,7 @@
  * status badge (Below / Around / Above Average).
  */
 import type { ReactElement } from 'react';
-import type { ComparisonResult } from '../types';
+import type { ComparisonResult, ComparisonStatus } from '../types';
 
 /** Props for the ComparisonCard component */
 interface ComparisonCardProps {
@@ -14,7 +14,8 @@ interface ComparisonCardProps {
   comparison: ComparisonResult;
 }
 
-const STATUS_CONFIG: Record<string, { badgeClass: string; message: string }> = {
+/** Status badge styling and message, keyed by {@link ComparisonStatus} */
+const STATUS_CONFIG: Record<ComparisonStatus, { badgeClass: string; message: string }> = {
   below: {
     badgeClass: 'bg-[#3DDC97]/10 text-[#3DDC97] border-[#3DDC97]/20',
     message: 'Below Average',
@@ -29,14 +30,11 @@ const STATUS_CONFIG: Record<string, { badgeClass: string; message: string }> = {
   },
 };
 
-/** Default config used when status does not match any key (defensive fallback) */
-const DEFAULT_STATUS_CONFIG = STATUS_CONFIG['average']!;
-
 /**
  * Renders the comparison card for the Dashboard.
  */
 export default function ComparisonCard({ comparison }: ComparisonCardProps): ReactElement {
-  const config = STATUS_CONFIG[comparison.status] ?? DEFAULT_STATUS_CONFIG;
+  const config = STATUS_CONFIG[comparison.status];
   
   // Calculate relative widths for comparison bars
   const maxVal = Math.max(comparison.userDaily, comparison.nationalAverage) * 1.2 || 1;

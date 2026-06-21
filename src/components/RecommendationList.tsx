@@ -2,10 +2,19 @@ import type { Recommendation } from '../types';
 import RecommendationCard from './RecommendationCard';
 import { Lightbulb } from 'lucide-react';
 
+/** Props for the {@link RecommendationList} component */
 interface RecommendationListProps {
+  /** Array of personalized recommendations sorted by impact */
   recommendations: Recommendation[];
 }
 
+/**
+ * Renders a grid of personalized carbon reduction recommendation cards.
+ * Shows an empty state with a prompt when no recommendations are available.
+ *
+ * @param props - Component props containing the recommendations array
+ * @returns Recommendation grid or empty state placeholder
+ */
 export default function RecommendationList({ recommendations }: RecommendationListProps) {
   if (recommendations.length === 0) {
     return (

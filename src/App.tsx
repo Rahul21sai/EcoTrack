@@ -25,6 +25,7 @@ import {
   calculateDailyTotal,
   compareToNationalAverage,
 } from './utils/carbonEngine';
+import { TREND_DAYS_LIMIT } from './utils/constants';
 import type { TrendDataPoint } from './types';
 import WeeklyInsightSummary from './components/WeeklyInsightSummary';
 
@@ -77,7 +78,7 @@ function AppContent() {
         total: Number(calculateDailyTotal(dateEntries).toFixed(2)),
       }))
       .sort((a, b) => a.date.localeCompare(b.date))
-      .slice(-14); // Last 14 days
+      .slice(-TREND_DAYS_LIMIT); // Last N days
   }, [entries]);
 
   // Comparison to national average

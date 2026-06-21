@@ -1,31 +1,36 @@
 import { useMemo } from 'react';
 import { CalendarDays, TrendingDown, BarChart3 } from 'lucide-react';
-import type { LogEntry } from '../types';
+import type { LogEntry, ImpactLevel } from '../types';
 import {
   calculateDailyTotal,
   formatCarbonValue,
   categorizeImpact,
 } from '../utils/carbonEngine';
 
+/** Props for the {@link DashboardSummary} component */
 interface DashboardSummaryProps {
+  /** All log entries used to compute today / week / month totals */
   entries: LogEntry[];
 }
 
-const IMPACT_COLORS: Record<string, string> = {
+/** Text color classes indexed by impact level */
+const IMPACT_COLORS: Record<ImpactLevel, string> = {
   low: 'text-[#3DDC97]',
   moderate: 'text-[#E8B84B]',
   high: 'text-[#E8634B]',
   'very-high': 'text-[#E8634B]',
 };
 
-const IMPACT_DOT_BG: Record<string, string> = {
+/** Dot background color classes indexed by impact level */
+const IMPACT_DOT_BG: Record<ImpactLevel, string> = {
   low: 'bg-[#3DDC97]',
   moderate: 'bg-[#E8B84B]',
   high: 'bg-[#E8634B]',
   'very-high': 'bg-[#E8634B]',
 };
 
-const IMPACT_RADIAL_BG: Record<string, string> = {
+/** Radial gradient background colors indexed by impact level */
+const IMPACT_RADIAL_BG: Record<ImpactLevel, string> = {
   low: 'rgba(61, 220, 151, 0.05)',
   moderate: 'rgba(232, 184, 75, 0.05)',
   high: 'rgba(232, 99, 75, 0.05)',
@@ -33,9 +38,11 @@ const IMPACT_RADIAL_BG: Record<string, string> = {
 };
 
 /**
- * Dashboard summary component that displays aggregated carbon footprint
- * totals for today, this week, and this month, along with an impact
- * level badge color-coded by severity.
+ * Dashboard summary showing aggregated carbon footprint totals for today,
+ * this week, and this month, along with an impact level badge.
+ *
+ * @param props - Component props containing the full entries array
+ * @returns Dashboard summary card with stats grid and impact hero
  */
 export default function DashboardSummary({ entries }: DashboardSummaryProps) {
   const today = new Date().toISOString().split('T')[0];

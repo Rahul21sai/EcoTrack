@@ -12,9 +12,10 @@
 
 import { useCallback, useState } from 'react';
 import type { ReactElement } from 'react';
-import { Car, Zap, Utensils, Trash2, History, Trash } from 'lucide-react';
+import { History, Trash } from 'lucide-react';
 import type { LogEntry, EmissionCategory } from '../types';
 import { formatCarbonValue, calculateDailyTotal } from '../utils/carbonEngine';
+import { getCategoryIcon } from '../utils/categoryIcons';
 
 /** Props for the HistoryLog component */
 interface HistoryLogProps {
@@ -27,12 +28,17 @@ interface HistoryLogProps {
 /** Filter categories for the history view */
 type HistoryFilter = 'all' | EmissionCategory;
 
+/** Shape of a filter pill option */
 interface FilterOption {
+  /** Unique filter identifier */
   id: HistoryFilter;
+  /** Display label for the pill */
   label: string;
+  /** Emoji icon shown next to the label */
   icon: string;
 }
 
+/** Available filter options for the history view */
 const FILTER_OPTIONS: FilterOption[] = [
   { id: 'all', label: 'All', icon: '🌍' },
   { id: 'transport', label: 'Transport', icon: '🚗' },
@@ -40,27 +46,6 @@ const FILTER_OPTIONS: FilterOption[] = [
   { id: 'food', label: 'Food', icon: '🍽️' },
   { id: 'waste', label: 'Waste', icon: '🗑️' },
 ];
-
-/**
- * Returns the category icon element for a given entry category.
- *
- * @param category - The emission category string
- * @returns A colored icon element, or null for unrecognized categories
- */
-function getCategoryIcon(category: string): ReactElement | null {
-  switch (category) {
-    case 'transport':
-      return <Car className="w-4 h-4 text-[#3D8BFF]" />;
-    case 'energy':
-      return <Zap className="w-4 h-4 text-[#E8B84B]" />;
-    case 'food':
-      return <Utensils className="w-4 h-4 text-[#3DDC97]" />;
-    case 'waste':
-      return <Trash2 className="w-4 h-4 text-[#8FA098]" />;
-    default:
-      return null;
-  }
-}
 
 /**
  * Renders the full history log with category filter pills and date grouping.
